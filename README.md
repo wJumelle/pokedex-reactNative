@@ -116,3 +116,13 @@ const styles = StyleSheet.create({
   }
 });
 ```
+
+### 01 - Fichier Layout
+
+Si on observe notre fichier **./app/_layout.tsx** on peut voir que c'est une
+**Stack**.
+
+Dans le fichier d'exemple, on peut voir que le projet était monté avec un système de stack mais aussi d'onglet **Tabs**. C'est pour cette raison que l'on retrouvait nos pages dans le dossier **(tabs)**.
+Dans le cas de cet exercice nous allons simplement utiliser le système de stack sans une navigation par onglet, raison pour laquelle ce dossier a été lui aussi supprimé.
+
+Le sous-élément `<Stack.Screen name="index" />` de l'élément `<Stack>`, présent dans l'exemple, permet de spécifier des particularités pour chaque écrans en y ajoutant des [**options**](https://reactnavigation.org/docs/native-stack-navigator#options).

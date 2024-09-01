@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text>Test.</Text>
+      <Text>Test without tabs.</Text>
     </View>
   );
 }
