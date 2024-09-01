@@ -53,3 +53,17 @@ Il se peut qu'un message d'erreur apparaisse alors autour de la configuration de
 Une fois cela fait, un simple apppuie sur la touche `a` permet de relancer l'exécution. Un message indiquant alors le périphérique créé dans Android Studio devrait apparaitre.
 
 > Opening exp://192.168.1.22:8081 on Pixel_7_API_35
+
+### Passage en direct via le smartphone
+
+Pour que cela fonctionne sur smartphone il faut ajouter la librairie **expo-dev-client** au projet via la commande `npm install expo-dev-client`.
+Un appuie sur la touche `s` permettra de reload le QR Code qui deviendra alors fonctionnel sur l'app **Expo Go**.
+
+Lors du démarrage l'app vous demande de choisir entre un **Development Build** ou **Expo Go**, choisir la deuxième option.
+
+Il est possible de continuer à rencontrer une erreur lors du lancement de la simulation, pour cela faire le combo `s` puis `a` permet de bypass l'erreur.
+Afin de la solutionner il faudrait créer un build EAS pour le projet. Voici le warning qui apparait :
+
+> The expo-dev-client package is installed, but a development build is not installed on Pixel_7_API_35.
+Launching in Expo Go. If you want to use a development build, you need to create and install one first.
+Learn more: https://docs.expo.dev/development/build/
