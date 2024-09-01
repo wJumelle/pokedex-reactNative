@@ -81,6 +81,6 @@ On aura aussi un dossier **components** qui va regrouper l'ensemble des composan
 
 Le fichier **app.json** est le fichier qui va contenir l'ensemble de la configuration de notre application, c'est un fichier très important pour la gestion de cette dernière.
 
-Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets** et **components** si nous désirons repartir de zéro.
+Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets**, **constants** et **components** (en les déplaçant dans le nouveau dossier **app-example** créé) si nous désirons repartir de zéro.
 
 Il faut bien sur s'assurer que le projet n'est pas en cours de virtualisation, si c'est le cas (et sur Microsoft + VSC) appuyer sur le combo `Ctrl + C` afin de stopper le serveur Metro.
