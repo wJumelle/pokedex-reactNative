@@ -1,5 +1,5 @@
 # pokedex-reactNative
-Initiation à React Native autour d'un projet fun : objectif création d'un Pokedex basé sur l'API PokeAPI. On suit la formation de Grafikart.
+Initiation à React Native autour d'un projet fun : objectif création d'un Pokedex basé sur l'API PokeAPI. On suit la vidéo découverte de React Native de [**Grafikart**](https://www.youtube.com/watch?v=0EOucUY_F0c&t=351s).
 
 ## Step by step
 
@@ -69,7 +69,7 @@ Un appuie sur la touche `s` permettra de reload le QR Code qui deviendra alors f
 
 Lors du démarrage l'app vous demande de choisir entre un **Development Build** ou **Expo Go**, choisir la deuxième option.
 
-Il est possible de continuer à rencontrer une erreur lors du lancement de la simulation, pour cela faire le combo `s` puis `a` permet de bypass l'erreur.
+Il est possible de continuer à rencontrer une erreur lors du lancement de la simulation, pour cela faire le combo `s` puis `a` permet de bypass l'erreur en passant par **Expo Go**.
 Afin de la solutionner il faudrait créer un build EAS pour le projet. Voici le warning qui apparait :
 
 > The expo-dev-client package is installed, but a development build is not installed on Pixel_7_API_35.
