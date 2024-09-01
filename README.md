@@ -5,6 +5,12 @@ Initiation à React Native autour d'un projet fun : objectif création d'un Poke
 
 ### Initialisation du projet
 
+On commence par vérifier que nous sommes bien dans une version stable (LTS) de Node.js.
+Pour cela ouvrir **PowerShell** et checker la version de node à l'aide de la commande `node -v`.
+En version non-LTS beaucoup de problèmes s'ajoutent et rendent le développement complexe.
+Il est possible et recommandé d'utiliser **fnm** (Fast Node Manager) afin de gérer vos versions de Node.
+[**Téléchargement de Node**](https://nodejs.org/en/download/package-manager/current)
+
 On initialise le projet grace au framework **Expo** qui va nous permettre d'ajouter tout un tas d'outil basique
 pour le développement d'api native. Il intègre une solution de test sur un smartphone, des routers etc.
 
@@ -21,11 +27,13 @@ Cela nécessite d'avoir un émulateur de lancé sur notre environnement de déve
 
 Pour le développement sous Android nous avons donc [**Android Studio**](https://developer.android.com/studio?hl=fr) et pour le développement pour iOs nous avons l'émulateur [**XCode**](https://developer.apple.com/xcode/) qui n'est disponible que sur l'environnement Apple (lel).
 
-Sinon on peut se permettre de lancer la commande `npm run start` qui démarrera le serveur **Metro** et affichera un QR Code. Ce QR code sera à lire via l'application Expo Go (disponible sur Android et iOs) afin de visualiser le dév directement sur le smartphone.
+Sinon on peut se permettre de lancer la commande `npm run start --reset-cache` qui démarrera le serveur **Metro** et affichera un QR Code. Ce QR code sera à lire via l'application Expo Go (disponible sur Android et iOs) afin de visualiser le dév directement sur le smartphone.
 
 L'app **Expo Go** (qui est elle-même une app en React Native) est capable d'émuler à distance le code présent dans notre projet.
 
 ### Installation de Android Studio
+
+Il est intéressant de suivre ce [**step-by-step**](https://docs.expo.dev/get-started/set-up-your-environment/?platform=android&device=simulated) fourni dans la documentation d'Expo.
 
 Lors de l'installation d'**Android Studio** bien veiller à laisser coché l'option **Android Virtual Device** qui est l'option de virtualisation et donc qui nous intéresse.
 
@@ -38,7 +46,7 @@ Pour le projet nous allons choisir un **Pixel 7**.
 Attention, lors de l'utilisation de ce genre de technologie il faut veiller à activer la **virtualisation de son processeur**.
 Pour ce faire et en fonction du type de processeur dans la machine, il est possible de suivre le [guide autour de BlueStack](https://support.bluestacks.com/hc/fr-fr/articles/360058102252-Comment-activer-la-Virtualisation-VT-pour-BlueStacks-5-sur-Windows-10#:~:text=Pour%20les%20processeurs%20AMD,Enabled%22%20dans%20le%20menu%20d%C3%A9roulant.).
 
-Une fois le device démarré, si la commande `npm run start` est toujours enclenché nous pouvons appuyer sur la touche `a` qui nous permet de lancer  l'émulation sur Android.
+Une fois le device démarré, si la commande `npm run start --reset-cache` est toujours enclenché nous pouvons appuyer sur la touche `a` qui nous permet de lancer  l'émulation sur Android.
 
 Il se peut qu'un message d'erreur apparaisse alors autour de la configuration de
 **android.package**. Pour corriger ce problème nous devons ajouter les lignes suivantes dans le fichier de configuration **app.json**.
@@ -81,6 +89,6 @@ On aura aussi un dossier **components** qui va regrouper l'ensemble des composan
 
 Le fichier **app.json** est le fichier qui va contenir l'ensemble de la configuration de notre application, c'est un fichier très important pour la gestion de cette dernière.
 
-Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets**, **constants** et **components** (en les déplaçant dans le nouveau dossier **app-example** créé) si nous désirons repartir de zéro.
+Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets**, **constants**, **hooks** et **components** (en les déplaçant dans le nouveau dossier **app-example** créé) si nous désirons repartir de zéro.
 
 Il faut bien sur s'assurer que le projet n'est pas en cours de virtualisation, si c'est le cas (et sur Microsoft + VSC) appuyer sur le combo `Ctrl + C` afin de stopper le serveur Metro.
