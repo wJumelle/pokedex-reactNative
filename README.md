@@ -92,3 +92,27 @@ Le fichier **app.json** est le fichier qui va contenir l'ensemble de la configur
 Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets**, **constants**, **hooks** et **components** (en les déplaçant dans le nouveau dossier **app-example** créé) si nous désirons repartir de zéro.
 
 Il faut bien sur s'assurer que le projet n'est pas en cours de virtualisation, si c'est le cas (et sur Microsoft + VSC) appuyer sur le combo `Ctrl + C` afin de stopper le serveur Metro.
+
+### 01 - Stylisation des composants
+
+Pour styliser des composants nous passerons par l'attribut **style** au niveau des composants.
+Cet attribut attends un objet contenant des paramètres CSS.
+
+Pour simplifier la lecture de nos composants, une bonne pratique est de déclarer à l'extérieur du composant une constante **styles** contenant la définition de tous les
+styles de la page.
+Au niveau de la complétion nous allons passer par une classe **StyleSheet** et sa méthode **create** afin d'avoir de l'aide lors de la saisie.
+
+```
+[...]
+<View style={styles.container}>
+  <Text>Test.</Text>
+</View>
+[...]
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#FF0000',
+    padding: 24
+  }
+});
+```
