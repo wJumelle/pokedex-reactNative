@@ -67,3 +67,20 @@ Afin de la solutionner il faudrait créer un build EAS pour le projet. Voici le 
 > The expo-dev-client package is installed, but a development build is not installed on Pixel_7_API_35.
 Launching in Expo Go. If you want to use a development build, you need to create and install one first.
 Learn more: https://docs.expo.dev/development/build/
+
+### Nettoyage du projet d'initialisation
+
+Lorsque l'on créé un projet à l'aide d'Expo, une structure est générée automatiquement avec quelques pages.
+
+Cette structure est basé sur le **router d'Expo**, on retrouve donc un dossier **app** à l'intérieur duquel nous retrouvons un dossier **(tabs)** qui est composé de 3 fichiers Typescript :
+* _layout.tsx
+* explore.tsx (qui correspond à la page Explore de l'app)
+* index.tsx (qui correspond à la page d'accueil de l'app)
+
+On aura aussi un dossier **components** qui va regrouper l'ensemble des composants développés pour notre application et un dossier **assets** qui regroupera les différents ressources utiles au bon fonctionnement de l'application.
+
+Le fichier **app.json** est le fichier qui va contenir l'ensemble de la configuration de notre application, c'est un fichier très important pour la gestion de cette dernière.
+
+Pour réinitialiser le projet nous allons exécuter la commande `npm run reset-project` qui aura pour objectif de déplacer le dossier **app** à l'intérieur d'un dossier **app-example** afin d'archiver les anciennes pages. Il faudra ensuite nettoyer les dossiers **assets** et **components** si nous désirons repartir de zéro.
+
+Il faut bien sur s'assurer que le projet n'est pas en cours de virtualisation, si c'est le cas (et sur Microsoft + VSC) appuyer sur le combo `Ctrl + C` afin de stopper le serveur Metro.
