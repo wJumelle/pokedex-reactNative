@@ -126,3 +126,34 @@ Dans le fichier d'exemple, on peut voir que le projet était monté avec un syst
 Dans le cas de cet exercice nous allons simplement utiliser le système de stack sans une navigation par onglet, raison pour laquelle ce dossier a été lui aussi supprimé.
 
 Le sous-élément `<Stack.Screen name="index" />` de l'élément `<Stack>`, présent dans l'exemple, permet de spécifier des particularités pour chaque écrans en y ajoutant des [**options**](https://reactnavigation.org/docs/native-stack-navigator#options).
+
+Lorsque l'on créé une page, une route va être immédiatement créé par le **router Expo** sans que l'on ait besoin de faire quoi que ce soit. Ainsi, si on utilise un élément `<Link href="" /></Link>` nous aurons à renseigner le nom du fichier de la page préfixé d'un '/'.
+
+Dans notre cas de figure nous allons jouer avec l'id des pokemons pour créer des routes. Pour se faire nous pouvons créer un dossier **./app/pokemons** dans lequel nous allons créer un fichier **[id].tsx**.
+
+Au niveau du fichier **[id].tsx** nous allons nous servir du hook de Expo-router : **useLocalSearchParams**. Ce hook va nous permettre de récupérer
+les paramètres compris dans notre URL.
+
+Au niveau du fichier **index.tsx** nous pouvons écrire les liens de deux façons différentes :
+```
+<Link href="/pokemons/25">Pikachu</Link>
+<Link href={{pathname: '/pokemons[id]', params: {id: 25}}}>Pikachu</Link>
+```
+
+Au niveau du fichier **_layout.tsx** nous ne pouvons malheureusement pas styliser la barre de titrage de l'app (cette dernière affiche le titre de la vue), cependant grace à des options nous pouvons informer React que nous souhaitons la masquer.
+```
+export default function RootLayout() {
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false
+      }}
+    />
+  );
+}
+```
+
+Cela a un impact, c'est que l'espace alloué à la zone du titre est maintenant utilisé pour afficher le design de notre app et donc ce dernier passe sous les éléments de
+l'UI (ou l'appareil photo) du téléphone. Pour contrer cela nous allons devoir changer l'élément `<View />` en élément `<SafeAreaView />` à l'intérieur du fichier **index.tsx**. Ce qui va ajouter automatiquement des padding à notre vue pour que la lisibilité soit optimale.
+
+Les Vues dans React Native fonctionne comme des éléments en **display flex**, pour faire en sorte que notre App occupe donc 100% de l'espace visible en hauteur de notre périphérique il suffit donc d'utiliser la propriétés `flex: 1`.
