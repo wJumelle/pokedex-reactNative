@@ -46,13 +46,13 @@ type Props = TextProps & {
   color?: keyof typeof Colors['light']
 }
 
-function ThemedText({variant, color, ...rest}: Props) {
+function ThemedText({variant, color, style, ...rest}: Props) {
   // On récupère les couleurs définit dans le fichier de constantes Colors en fonction du thème dark ou light de l'utilisateur
   const colors = useThemeColors();
 
   // On retourne le texte stylisé à l'aide d'un tableau contenant les styles de texte
   // Et les styles de couleurs
-  return <Text style={[ styles[variant ?? 'body3'], {color: colors[color ?? "grayDark"]} ]} {...rest} />
+  return <Text style={[ styles[variant ?? 'body3'], {color: colors[color ?? "grayDark"]}, style ]} {...rest} />
 }
 
 export default ThemedText;

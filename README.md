@@ -314,3 +314,55 @@ export default function Index() {
   );
 }
 ```
+
+### 02 - Création des cards
+
+Pour la créaion du composant **Card** on va modifier le code présent sur **index.tsx** afin d'intégrer `<ThemedText />` à l'intérieur du nouveau composant.
+Ce nouveau composant possédera des **Props** qui nous permettront de passer les styles mais aussi d'hériter des Props de  **ViewProps**.
+
+```
+type Props = ViewProps;
+
+function Card({style, ...rest}: Props) {
+  return (
+    <View style={[style, styles]} {...rest} />
+  )
+}
+
+const styles = {
+  backgroundColor: "#FFF",
+  borderRadius: 8,
+} satisfies ViewStyle
+```
+
+On va s'attarder sur le passage `satisfies ViewStyle`, ce petit bout de code permet d'indiquer à l'IDE que l'on cherche à obtenir une
+vérification du code en fonction de ce qu'il connait autour de **ViewStyle**.
+Ainsi, si l'on rate l'écriture d'une propriété CSS, alors cette dernière sera souligné en rouge.
+
+Nouveau problème, si l'on se réfère à la documentation autour des [**shadow-props**](https://reactnative.dev/docs/shadow-props#props) pour gérer les ombres portées dans React Native nous avons deux façon de faire, une pour iOs et une pour Android.
+Afin de gérer les deux cas de figure nous allons devoir créer un nouveau fichier de constantes **Shadows.ts**.
+
+* [**Shadow Props**](https://reactnative.dev/docs/shadow-props#props) pour iOs
+* [**elevation View Style Props**](https://reactnative.dev/docs/view-style-props#elevation-android) pour Android
+
+```
+// Fichier ./constants/Shadows.ts
+import { ViewStyle } from "react-native";
+
+export const Shadows = {
+  dp2: {
+    shadowColor: '#000',
+    shadowOpacity: 0.2, //iOs
+    shadowOffset: {width: 0, height: 1}, //iOs
+    shadowRadius: 3, //iOs
+    elevation: 2 //Android
+  }
+} satisfies Record<string, ViewStyle>
+
+// Fichier Card.tsx
+const styles = {
+  backgroundColor: "#FFF",
+  borderRadius: 8,
+  ...Shadows.dp2
+} satisfies ViewStyle
+```
