@@ -157,3 +157,160 @@ Cela a un impact, c'est que l'espace alloué à la zone du titre est maintenant 
 l'UI (ou l'appareil photo) du téléphone. Pour contrer cela nous allons devoir changer l'élément `<View />` en élément `<SafeAreaView />` à l'intérieur du fichier **index.tsx**. Ce qui va ajouter automatiquement des padding à notre vue pour que la lisibilité soit optimale.
 
 Les Vues dans React Native fonctionne comme des éléments en **display flex**, pour faire en sorte que notre App occupe donc 100% de l'espace visible en hauteur de notre périphérique il suffit donc d'utiliser la propriétés `flex: 1`.
+
+### 02 - Traduction du design system
+
+Pour cela nous allons créer un nouveau dossier **components** à la racine de notre projet, à l'intérieur duquel nous allons créer le fichier **ThemedText.tsx**.
+Ce nouveau composant va nous permettre de créer les différents styles de texte dont nous avons besoin pour l'app.
+
+A l'intérieur de ce dernier nous allons définir des **Props** à l'aide de Typescript. Lorsque les **Props** ne sont pas obligatoire (par exemple car on a définit une valeur par défault) on peut faire suivre son nom d'un **?**.
+
+```
+type Props = {
+  variant?: string,
+  color?: string
+}
+```
+
+Maintenant si nous souhaitons ajouter les propriétés par défaut le l'élément `<Text />` de React native nous pouvons les définir de la façon suivante.
+Ci-dessous on hérite des **Props** de React native et on définit les deux qui vont nous intéresser.
+```
+type Props = TextProps & {
+  variant?: string,
+  color?: string
+}
+```
+
+Au niveau du composant `<ThemedText />` nous allons passer les **Props** de cette manière. Ici **...rest** correspond l'ensemble des Props héritées de
+`<Text />`.
+```
+function ThemedText({variant, color, ...rest}: Props) {
+  return <Text {...rest} />
+}
+```
+
+Maintenant si l'on regarde le Design System (page Style Guide) nous allons trouver tous les styles de texte qui nous intéresse.
+Ces styles de textes nous allons les définir à l'aide de la méthode **StyleSheet.create()** de React Native.
+Ce sont ces styles que nous allons ensuite passer en props à l'aide de `variant?: keyof typeof styles` au niveau de la définition des Props.
+```
+const styles = StyleSheet.create({
+  headline: {
+    fontSize: 24,
+    lineHeight: 32,
+    fontWeight: "bold"
+  },
+  [...],
+  caption: {
+    fontSize: 8,
+    lineHeight: 12
+  }
+});
+```
+
+Au niveau du composant nous obtenons donc ceci, avec **body3** la valeur par défaut de nos textes stylisés.
+```
+// Composant ThemedText
+function ThemedText({variant, color, ...rest}: Props) {
+  return <Text style={styles[variant ?? 'body3']} {...rest} />
+}
+
+// Utilisation du composant dans le fichier **index.tsx**
+<ThemedText variant="headline">Pokedex</ThemedText>
+```
+
+Nous faisons maintenant les mêmes choses pour les couleurs. Et là, ça se corse car pour les téléphones nous avons la possibilité d'être en **dark/lightmode**.
+Nous devons donc prendre en considération cette option.
+Nous allons donc créer un nouveau dossier **constants** à la racine du projet à l'intérieur duquel nous allons définir le fichier **Colors.ts**.
+
+A l'intérieur de ce fichier nous allons exporter une grosse constante **Colors** qui contiendra deux clés qui auront le même nombre de propriétés (**light** et **dark**) et surtout où l'on pourra retrouver à chaque fois des propriétés portant le même nom !
+Si aucune différence n'est précisé entre le light / dark mode alors **nous devons définir deux fois les mêmes couleurs**.
+Un troisième clé nous permettra de définir les couleurs des types de pokémons, ces couleurs ne devant pas varier en fonction du mode elles sont définis en dehors des deux premières.
+```
+export const Colors = {
+  light: {
+    tint: "#DC0A2D",
+    grayDark: "#212121",
+    grayMedium: "#666666",
+    grayLight: "#E0E0E0",
+    grayBackground: "#EFEFEF",
+    white: "#FFFFFF"
+  },
+  dark: {
+    tint: "#DC0A2D",
+    grayDark: "#212121",
+    grayMedium: "#666666",
+    grayLight: "#E0E0E0",
+    grayBackground: "#EFEFEF",
+    white: "#FFFFFF"
+  },
+  types: {
+    bug: "#A7B723",
+    dark: "#75574C",
+    [...]
+  }
+}
+
+```
+
+Au niveau de l'app, pour aller automatiquement chercher la couleur que l'on souhaite entre le thème **light** ou le thème **dark** nous aurons besoin d'un hook.
+Nous créons donc un nouveau dossier **hooks** à la racine du projet, dans lequel nous créons le fichier **useThemeColors.ts**.
+
+Dans ce fichier nous allons utiliser le hook **useColorScheme()** qui va nous donner l'information de la configuration de l'utilisateur (soit light soit dark).
+Si nous ne recevons aucune donnée nous pouvons définir une valeur par défaut `const theme = useColorScheme() ?? "light";`, ici **light**.
+
+Nous obtenons ainsi le hook suivant qui retourne les couleurs en fonction du thème de l'utilisateur.
+```
+// Fichier ./hooks/useThemeColors.ts
+function useThemeColors() {
+  const theme = useColorScheme() ?? "light";
+  return Colors[theme];
+}
+
+// Fichier ./app/index.tsx, on vient définir la props **color**
+export default function Index() {
+  return (
+    [...]
+      <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
+    [...]
+  );
+}
+```
+
+Toutes ces modifications entrainent des changements obligatoires du coté du fichier du composant **ThemedText.tsx**.
+
+```
+// Au niveau des Props nous allons indiquer qu'il s'agit d'un string qui est attendu à l'aide du combo keyof typeof autours
+// de la constante définit dans le projet, on prend par défaut "light" afin d'entrer dans l'une des deux possibilité pour paramétrer
+// la props
+type Props = TextProps & {
+  variant?: keyof typeof styles,
+  color?: keyof typeof Colors['light']
+}
+
+function ThemedText({variant, color, ...rest}: Props) {
+  // On récupère les couleurs définit dans le fichier de constantes Colors en fonction du thème dark ou light de l'utilisateur
+  const colors = useThemeColors();
+
+  // On retourne le texte stylisé à l'aide d'un tableau contenant les styles de texte
+  // Et les styles de couleurs
+  return <Text style={[ styles[variant ?? 'body3'], {color: colors[color ?? "grayDark"]} ]} {...rest} />
+}
+```
+
+Nous pouvons même faire évoluer la vue dans le fichier **index.tsx** en passant la couleur **tint** en paramètre à la vue.
+De la même façon que pour l'élément `<Text />` retourné ci-dessous nous allons éditer l'attribut style en passant de `<SafeAreaView style={styles.container}>` à `<SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>`.
+Nous créons un tableau dans lequel nous passons en premier élément les styles définit pour le container et en deuxième élément un objet contenant la personnalisation du background de notre composant `<SafeAreaView />`.
+```
+export default function Index() {
+  const colors = useThemeColors();
+
+  return (
+    <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
+      <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
+      <Link href="/about">About</Link>
+      <Link href="/pokemons/25">Pikachu</Link>
+      <Link href={{pathname: '/pokemons/[id]', params: {id: 25}}}>Pikachu</Link>
+    </SafeAreaView>
+  );
+}
+```
