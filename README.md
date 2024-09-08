@@ -366,3 +366,46 @@ const styles = {
   ...Shadows.dp2
 } satisfies ViewStyle
 ```
+
+### 02 - Création de la page de listing de tous les pokémons
+
+> ❗ React Native n'aime pas les fichiers au format .svg. Pour cet exercice nous allons donc utiliser exclusivement des .png.
+> Pour Android il n'aime pas non plus les ombres portées vers l'intérieur, nous ne pouvons donc réaliser l'effet du body dans la section listing.
+
+Pour charger une image dans React Native il existe un composant [`<Image />`]((https://reactnative.dev/docs/image)). A l'intérieur de ce composant nous retrouvons
+un attribut **source** qui nous permet d'effectuer un **require** de notre élément présent en local dans notre projet `<Image source={require("@/assets/images/pokeball-white.png")} style={styles.tinyLogo} />`.
+Comme toujours nous pouvons spécifier un attribut **style** afin de lui définir des proprpiétés CSS.
+Le **@** devant le début du chemin est l'écriture qui permet de cibler un élément en local.
+
+Pour le listing nous allons nous servir d'un composant qui existe déjà dans React Native, les [**FlatList**](https://reactnative.dev/docs/flatlist).
+Ce composant est directement géré par le système d'exploitation qui exécutera notre code, ce qui permet de grandement optimiser l'application.
+
+Pour débuter la mise en place de l'affichage de la liste des pokémons nous allons simuler un faux tableau de pokemon, avant de réaaliser la connexion en API.
+Nous créons donc un tableau en précisant la taille voulu en référence `{length: 35}` puis nous passons une fonction qui permettra de prendre l'index du pokémon en référence.
+```
+const pokemons = Array.from({length: 35}, (_, index) => ({
+  name: 'Pokemon name',
+  id: index + 1
+}));
+```
+
+Au niveau du composant `<FlatList />` que l'on intègre à la `<Card />` nous retrouvons deux attributs différents : **data** et **renderItem**.
+**data** prend en entrée un tableau, ici ce sera notre tableau de pokémons.
+**renderItem** prend en entrée une fonction qui parcours l'ensemble des **items** afin d'en créer les éléments du react DOM.
+A l'intérieur de **renderItem** nous pouvons voir l'usage de [**keyExtractor**](https://reactnative.dev/docs/sectionlist#keyextractor) qui permet d'utiliser l'id du pokemon en tant que clé de l'élément de la liste. **keyExtractor** attend une chaine de caractère donc nous transformons l'id de pokémon en string à l'aide de la fonction **toString()**.
+
+Pour coller à la maquette, nous pouvons ajouter l'attribut **numColumns** afin d'indiquer que l'on souhaite afficher notre liste sur 3 colonnes. Cette modification génère une erreur, ce n'est pas une modification qui peut se faire de manière dynamique avec l'autoreload d'activé sur les apps. Il faut donc recharger les apps !
+
+On se sert des attributs **contentContainerStyle** et **columnWrapperStyle** afin de gérer les gap entre les cards des pokémons.
+**contentContainerStyle** nous permet aussi de préciser le padding autour du container.
+```
+<FlatList
+  data={pokemons}
+  numColumns={3}
+  contentContainerStyle={[styles.gridGap, styles.grid]}
+  columnWrapperStyle={styles.gridGap}
+  renderItem={({item}) => <Card style={{flex: 1/3}}>
+  <Text>{item.name}</Text>
+  </Card>} keyExtractor={(item) => item.id.toString()}
+/>
+```
