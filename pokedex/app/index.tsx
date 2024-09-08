@@ -1,37 +1,12 @@
 import Card from "@/components/Card";
+import PokemonCard from "@/components/pokemon/PokemonCard";
 import ThemedText from "@/components/ThemedText";
 import { Shadows } from "@/constants/Shadows";
+import { getPokemonId } from "@/functions/pokemons";
+import useFetchQuery from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-export default function Index() {
-  const colors = useThemeColors();
-  const pokemons = Array.from({length: 35}, (_, index) => ({
-    name: 'Pokemon name',
-    id: index + 1
-  }));
-
-  return (
-    <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
-        <View style={styles.header}>
-          <Image source={require("@/assets/images/pokeball-white.png")} style={styles.tinyLogo} />
-          <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
-        </View>
-        <Card style={styles.body}>
-          <FlatList
-            data={pokemons}
-            numColumns={3}
-            contentContainerStyle={[styles.gridGap, styles.grid]}
-            columnWrapperStyle={styles.gridGap}
-            renderItem={({item}) => <Card style={{flex: 1/3}}>
-            <Text>{item.name}</Text>
-            </Card>} keyExtractor={(item) => item.id.toString()}
-          />
-        </Card>
-    </SafeAreaView>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -60,3 +35,27 @@ const styles = StyleSheet.create({
     gap: 8
   }
 });
+
+export default function Index() {
+  const colors = useThemeColors();
+  const { data } = useFetchQuery('/pokemon?limit=21');
+  const pokemons = data?.results ?? [];
+
+  return (
+    <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
+        <View style={styles.header}>
+          <Image source={require("@/assets/images/pokeball-white.png")} style={styles.tinyLogo} />
+          <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
+        </View>
+        <Card style={styles.body}>
+          <FlatList
+            data={pokemons}
+            numColumns={3}
+            contentContainerStyle={[styles.gridGap, styles.grid]}
+            columnWrapperStyle={styles.gridGap}
+            renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
+          />
+        </Card>
+    </SafeAreaView>
+  );
+}

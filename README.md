@@ -369,6 +369,8 @@ const styles = {
 
 ### 02 - Création de la page de listing de tous les pokémons
 
+#### 02 - Mise en place du body
+
 > ❗ React Native n'aime pas les fichiers au format .svg. Pour cet exercice nous allons donc utiliser exclusivement des .png.
 > Pour Android il n'aime pas non plus les ombres portées vers l'intérieur, nous ne pouvons donc réaliser l'effet du body dans la section listing.
 
@@ -407,5 +409,88 @@ On se sert des attributs **contentContainerStyle** et **columnWrapperStyle** afi
   renderItem={({item}) => <Card style={{flex: 1/3}}>
   <Text>{item.name}</Text>
   </Card>} keyExtractor={(item) => item.id.toString()}
+/>
+```
+
+#### 03 - Mise en place du composant pour l'affichage des pokémons dans la liste
+
+Création du composant `<PokemonCard />` qui va reposer autour de 3 props : **id**, **name** et **style**.
+**Style** étant une props optionnelle.
+
+```
+type Props = {
+  style?: ViewStyle,
+  id: number,
+  name: string
+}
+
+function PokemonCard({style, id, name}: Props) {
+  const colors = useThemeColors();
+
+  return <Card style={[style, styles.cardPokemon]}>
+    <ThemedText variant="caption" color="grayMedium" style={{alignSelf: 'flex-end'}}>#{id.toString().padStart(3, '0')}</ThemedText>
+    <Image source={{uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}} style={styles.imgPokemon} />
+    <ThemedText color="grayDark">{name}</ThemedText>
+    <View style={[styles.boxShadow, {backgroundColor: colors.grayBackground}]} />
+  </Card>
+}
+```
+
+Dans ce composant nous utilisons l'API **pokeapi** pour récupérer les images avec l'aide de l'attribut **id** pour rendre dynamique le fichier.
+Maintenant nous avons conçu la liste de pokémon en fonction d'un tableau, il faudrait maintenant la rendre dynamique en attaquant l'API.
+
+Pour gérer cet appel nous allons utiliser **fetch** mais surtout la librairie [**React query**](https://tanstack.com/query/latest) (qui permet de gérer le cache etc).
+Au niveau de l'API nous allons call l'URL `https://pokeapi.co/api/v2/pokemon?limit=21`, la limite de 21 provient du fait de faire 7 lignes de 3.
+
+Il est déconseillé généralement d'utiliser directement une librairie, nous allons donc créer un hook **useFetchQuery** qui utilisera cette librairie.
+La librairie utilise une méthode **useQuery** qui prend en entrée deux paramètres **queryKey**, qui nous permettra de gérer notamment le cache pour ne pas effectuer plusieurs fois le même appel, et **queryFn** une fonction asynchrone à l'intérieur de laquelle on va simuler un waiting screen et l'appel de **fetch**.
+```
+function useFetchQuery(path: string) {
+  return useQuery({
+    queryKey: [path],
+    queryFn: async () => {
+      // La fonction est un timer qui va nous permettre de simuler un périphèrique ou une connexion lente
+      await wait(1);
+
+      // Une fois le timer passer on retourne le résultat de l'appel API
+      return fetch(endpoint + path).then(r => r.json())
+    }
+  })
+}
+```
+
+Au niveau de la page **Index** nous récupérons les datas de l'API et créons le tableau qui contiendra les résultats.
+Pendant le temps de chargement des données nous n'avons aucune donnée à afficher autour des pokémons, c'est la raison pour laquelle nous passons un tableau vide par défaut à notre constante **pokemons**.
+```
+const { data } = useFetchQuery('/v2/pokemon?limit=21');
+const pokemons = data?.results ?? [];
+```
+
+Nous avons un maintenant un problème en plus, au niveau de l'API nous récupérons les données suivantes, **name** et **url**.
+```
+{
+  "name": "bulbasaur",
+  "url": "https://pokeapi.co/api/v2/pokemon/1/"
+}
+```
+
+Nous n'avons donc pas les **ids** des pokémons, c'est la raison pour laquelle nous allons créer une fonction permettant de parser l'URL afin d'en extraire l'id.
+**parseInt** est une fonction qui prend deux paramètres, la chaine de caractère à traduire et la **base**. Ici, nous choisissons la base 10 qui est la base par défaut du décimale.
+Les URLs étant de la forme `https://pokeapi.co/api/v2/pokemon/1/` l'id se situe à -2 dans le tableau (le moins indique que l'on part de la fin).
+Le **!** après `at(-2)` permet de préciser que l'on sait pertinemment que cela va se produire, les URLs de l'API étant composé essentiellement de **/**.
+```
+export function getPokemonId(url: string): number {
+  return parseInt(url.split('/').at(-2)!, 10)
+}
+```
+
+Maintenant nous faisons évoluter la transmission de l'id du pokemon au niveau du composant `<PokemonCard />` nous pouvons transmettre l'id à l'aide de la fonction créé ci-dessus.
+```
+<FlatList
+  data={pokemons}
+  numColumns={3}
+  contentContainerStyle={[styles.gridGap, styles.grid]}
+  columnWrapperStyle={styles.gridGap}
+  renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
 />
 ```
