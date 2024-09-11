@@ -494,3 +494,26 @@ Maintenant nous faisons évoluter la transmission de l'id du pokemon au niveau d
   renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
 />
 ```
+
+Comme pour les routeurs de React, l'utilsiation de la librairie **React query** nécessite la mise en place d'un **Provider** à l'aide de la classe [**QueryClientProvider**](https://tanstack.com/query/latest/docs/framework/react/reference/QueryClientProvider).
+Encore une fois, comme pour les routeurs nous allons positionner ce provider au plus haut niveau de notre application, le **fichier de gestion des layouts**.
+Nous allons donc importer la classe [**QueryClient**](https://tanstack.com/query/latest/docs/reference/QueryClient#queryclient) qui sera passée en paramètre du provider.
+
+```
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Stack } from "expo-router";
+
+const queryClient = new QueryClient()
+
+export default function RootLayout() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Stack
+        screenOptions={{
+          headerShown: false
+        }}
+      />
+    </QueryClientProvider>
+  );
+}
+```
