@@ -538,3 +538,56 @@ C'est un composant issue de react native qui nous permettra d'afficher un loader
   renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
 />
 ```
+
+#### 04 - Mise en place de l'infinite scrolling avec useQuery
+
+Si nous désirons faire en sorte que lorsque l'utilisateur scroll dans la liste la suite des pokémons se charge, cela n'est actuellement pas possible avec notre
+hook **useFetchQuery**. Nous allons donc créer un deuxième hook, qui prendra lui aussi en paramètre le chemin d'appel, et qui utilisera [**useInfiniteQuery**](https://tanstack.com/query/latest/docs/framework/react/reference/useInfiniteQuery) de react-query.
+
+Ce nouveau hook aura deux paramètres que nous avons déjà vu chez **useQuery** : **queryKey** et **queryFn**.
+Encore une fois **queryKey** aura comme référence le chemin utilisé pour le call de l'API, alors que **queryFn** sera la fonction qui effectuera l'appel.
+Deux nouveau paramètres font leur apparition :
+* **initialPageParam** qui nous permet simplement de spécifier la page par laquelle nous commençons la réception de nos données ; dans l'API PokeApi nous ne possédons pas d'indication de la page en cours / du numéro de la page suivante, nous avons directement l'URL à appeler pour récupérer les données suivantes en valeur de la propriété **next**. Donc notre point d'entrée sera simplement notre chemin d'appel, soit `endpoint + path`.
+* pour que le hook fonctionne nous avons besoin d'un dernier paramètre : **getNextPageParam**. C'est la fonction qui va nous permettre de récupérer le chemin vers la prochaine page.
+
+```
+export function useInfiniteFetchQuery(path: string) {
+  return useInfiniteQuery({
+    queryKey: [path],
+    initialPageParam: endpoint + path,
+    queryFn: async ({pageParam}) => {
+      await wait(1);
+      return fetch(pageParam, {
+        headers: {
+          Accept: 'application/json'
+        }
+      }).then(r => r.json())
+    },
+    getNextPageParam: (lastPage) => {
+      if("next" in lastPage) {
+        return lastPage.next
+      }
+      return null
+    }
+  })
+}
+```
+
+Nous pouvons observer que **queryFn** retourne le résultat au format json de l'appel de **pageParam**, **pageParam** représentant le chemin de l'API en fonction de la position dans la profondeur du tableau.
+La fonction **getNextPageParam** prend en paramètre **lastPage** qui représente le dernier résultat de l'appel de **queryFn**. Si on peut retrouver dans ce résultat l'entrée **next** alors c'est qu'une page suivante peut être chargée et donc on la retourne, sinon on retour null.
+
+Maintenant le problème que nous rencontrons en appelant **useInfiniteFetchQuery** à la place de **useFetchQuery** c'est qu'il nous envoie pas le même type de data.
+Nous allons donc revoir nos codes pour la lecture du résultat.
+
+```
+// Avant
+const pokemons = data?.results ?? [];
+
+// Après
+// data?.pages contient l'ensemble des données des pages déjà chargées, lors de la première itération ce sera donc un tableau
+// qui contiendra les données des 21 premiers pokémons mais aussi toutes les données de navigation (next, prev)
+// la méthode flatMap() nous permet d'aplatir le tableau et d'en extraire que les données qui nous intéressent soit page.results
+const pokemons = data?.pages.flatMap(page => page.results) ?? [];
+```
+
+Voici la [**documentation autour de flatMap()**](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap). C'est une fonction qui combine l'usage des méthodes **map()** et **flat()** mais en étant plus optimisée.
