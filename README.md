@@ -517,3 +517,24 @@ export default function RootLayout() {
   );
 }
 ```
+
+#### 04 - Mise en place du loader pendant le chargement des données de l'API
+
+Pour réaliser ce tour de force c'est en vérité assez simple !
+Nous allons utiliser l'attribut [**ListFooterComponent**](https://reactnative.dev/docs/flatlist#listfootercomponent) de notre composant `<FlatList />`, cet attribut prend en valeur un composant que l'on souhaite insérer en fin de liste.
+Le tricks maintenant est de faire disparaitre ce composant lorsque les datas sont chargées et pour cela nous allons avoir besoin de l'information de si l'on est en train de charger les données ou non. Le hook **useQuery** de la libraire **react query** nous délivre une variable d'état à travers notre hook personnalisé **useFetchQuery**. Cette variable d'état s'intitule **isFetching**.
+En vérifiant **isFetching** nous pouvons afficher ou non un composant `<ActivityIndicator />`.
+C'est un composant issue de react native qui nous permettra d'afficher un loader fonctionnel pour tous les environnements.
+
+```
+<FlatList
+  data={pokemons}
+  numColumns={3}
+  contentContainerStyle={[styles.gridGap, styles.grid]}
+  columnWrapperStyle={styles.gridGap}
+  ListFooterComponent={
+    isFetching ? <ActivityIndicator color={colors.tint} size="large"/> : null
+  }
+  renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
+/>
+```

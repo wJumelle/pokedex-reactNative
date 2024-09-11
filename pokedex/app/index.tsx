@@ -5,7 +5,7 @@ import { Shadows } from "@/constants/Shadows";
 import { getPokemonId } from "@/functions/pokemons";
 import useFetchQuery from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const styles = StyleSheet.create({
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
 
 export default function Index() {
   const colors = useThemeColors();
-  const { data } = useFetchQuery('/pokemon?limit=21');
+  const { data, isFetching } = useFetchQuery('/pokemon?limit=21');
   const pokemons = data?.results ?? [];
 
   return (
@@ -53,6 +53,9 @@ export default function Index() {
             numColumns={3}
             contentContainerStyle={[styles.gridGap, styles.grid]}
             columnWrapperStyle={styles.gridGap}
+            ListFooterComponent={
+              isFetching ? <ActivityIndicator color={colors.tint} size="large"/> : null
+            }
             renderItem={({item}) => <PokemonCard id={getPokemonId(item.url)} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.url}
           />
         </Card>
