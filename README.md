@@ -679,3 +679,103 @@ function PokemonCard({style, id, name}: Props) {
   </Link>
 }
 ```
+
+#### 05 - Mise en place du formulaire sur la page de listing
+
+Pour ne pas noyer le code de notre page dans du code brut nous allons créer un nouveau composant `<SearchBar />` que l'on va venir intégrer dans une `<View />` de la page **index.tsx**.
+`<SearchBar />` est un composant qui aura deux props que l'on va typer à l'aide de Typescript : **value** et **onChange**.
+* **value** est la props qui correspondra à la valeur du champ de recherche
+* **onChange** sera la fonction qui sera exécuté lorsque le périphérique détectera un changement au niveau de notre champ
+
+Ces deux éléments ne sont pas sans nous rappeler quelque chose de très commun en React : les variables d'états.
+En effet, dans React native comme dans React nous allons nous servir du hook **useState** pour définir un état de notre composant. Cet état sera définit au niveau de la page **index** et sera transmis au composant à l'aide des props que l'on a cité plus haut.
+
+```
+//page index.tsx
+export default function Index() {
+  [...]
+  const [ search, setSearch ] = useState('');
+
+  return (
+    <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
+        [...]
+        <View>
+          <SearchBar value={search} onChange={setSearch}></SearchBar>
+        </View>
+        [...]
+    </SafeAreaView>
+  );
+}
+
+// composant SearchBar
+type Props = {
+  value: string,
+  onChange: (s: string) => void
+}
+
+function SearchBar({value, onChange}: Props) {
+  return (
+    <View>
+      <TextInput onChangeText={onChange} value={value}></TextInput>
+    </View>
+  )
+}
+```
+
+A la différence du web, les composants de type champ de formulaire arrive totalement nu, sans aucun style.
+Nous devons donc tout faire en partant de zéro.
+
+Dans la maquette nous observons que nous avons besoin d'encapsuler différents éléments pour les aligner de manière horizontal. Afin d'éviter d'imbriquer des `<View />` les uns dans les autres nous allons créer un composant `<Row />` qui nous permettra tout simplement l'affichage de plusieurs éléments en ligne. Ce composant `<Row />` servira aussi d'ailleurs à revoir l'intégration du **header**. Ce nouveau composant acceptera donc en props **style**, **gap** et autres props de type **ViewProps**.
+
+```
+function Row({style, gap, ...rest}: Props) {
+  return (
+    <View style={[rowStyle, style, gap ? {gap: gap} : undefined]} {...rest}></View>
+  )
+}
+```
+
+Pour la stylisation du composant `<SearchBar />` nous allons devoir faire malheureusement sans le composant `<ThemedText />` qui nous permettait jusque-là de styliser nos textes. Nous allons devoir créer donc des nouveaux styles nous permettant d'afficher notre input correctement.
+
+```
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    borderRadius: 16,
+    height: 32,
+    paddingHorizontal: 12
+  },
+  input: {
+    flex: 1,
+    height: 16,
+    lineHeight: 16
+  }
+})
+```
+
+A la fin notre composant `<SearchBar />` ressemble donc à ceci.
+
+```
+function SearchBar({value, onChange}: Props) {
+  const colors = useThemeColors();
+
+  return (
+    <Row style={[styles.wrapper, { backgroundColor: colors.grayWhite }]} gap={8}>
+      <Image source={require("@/assets/images/search.png")} width={16} height={16} />
+      <TextInput onChangeText={onChange} value={value} placeholder="Search..." placeholderTextColor={colors.grayMedium} style={[styles.input, {color: colors.grayDark}]}></TextInput>
+    </Row>
+  )
+}
+```
+
+Nous allons maintenant chercher à rendre fonctionnel notre relation entre le formulaire et l'affichage de notre liste.
+Et pour cela rien de plus simple, il suffit de créer une nouvelle variable **filteredPokemons** qui va venir filtrer notre liste de pokemons que l'on passera à notre composant `<FlatList />`.
+
+```
+// Si search existe (donc non null ou '') alors on filtre
+// sinon on affiche l'ensemble de la liste chargée
+const filteredPokemons = search ? pokemons.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || getPokemonId(p.url).toString() === search) : pokemons;
+```
+
+Lorsque l'on filtre on accède à un nombre restreint des pokémons et donc on déclenche l'événement **onEndReached** du composant `<FlatList />` automatiquement, ce qui exécute en boucle la query vers l'API afin de rechercher d'avantage de pokémon. Cela peut être l'effet voulu, personnelement je ne trouve pas cela déconnant.
+Dans le tutoriel suivi Grafikart bloque cette option tout simplement en modifiant la props **onEndReached** en précisant que si une recherche existe alors il ne faut rien faire `onEndReached={search ? undefined : () => fetchNextPage()}`.

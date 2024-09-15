@@ -1,10 +1,13 @@
 import Card from "@/components/Card";
 import PokemonCard from "@/components/pokemon/PokemonCard";
+import Row from "@/components/Row";
+import SearchBar from "@/components/SearchBar";
 import ThemedText from "@/components/ThemedText";
 import { Shadows } from "@/constants/Shadows";
 import { getPokemonId } from "@/functions/pokemons";
-import { useFetchQuery, useInfiniteFetchQuery } from "@/hooks/useFetchQuery";
+import { useInfiniteFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
+import { useState } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,10 +17,12 @@ const styles = StyleSheet.create({
     padding: 4
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    padding: 12
+    padding: 12,
+    paddingBottom: 8
+  },
+  searchBar: {
+    paddingBottom: 24,
+    paddingHorizontal: 12
   },
   tinyLogo: {
     width: 24,
@@ -39,18 +44,23 @@ const styles = StyleSheet.create({
 export default function Index() {
   const colors = useThemeColors();
   const { data, isFetching, fetchNextPage } = useInfiniteFetchQuery('/pokemon?limit=21');
-  // const pokemons = data?.results ?? [];
+  const [ search, setSearch ] = useState('');
   const pokemons = data?.pages.flatMap(page => page.results) ?? [];
+  const filteredPokemons = search ?
+    pokemons.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || getPokemonId(p.url).toString() === search) : pokemons;
 
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: colors.tint}]}>
-        <View style={styles.header}>
+        <Row style={styles.header} gap={16}>
           <Image source={require("@/assets/images/pokeball-white.png")} style={styles.tinyLogo} />
           <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
-        </View>
+        </Row>
+        <Row style={styles.searchBar}>
+          <SearchBar value={search} onChange={setSearch}></SearchBar>
+        </Row>
         <Card style={styles.body}>
           <FlatList
-            data={pokemons}
+            data={filteredPokemons}
             numColumns={3}
             contentContainerStyle={[styles.gridGap, styles.grid]}
             columnWrapperStyle={styles.gridGap}
