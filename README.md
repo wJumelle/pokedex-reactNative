@@ -591,3 +591,46 @@ const pokemons = data?.pages.flatMap(page => page.results) ?? [];
 ```
 
 Voici la [**documentation autour de flatMap()**](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap). C'est une fonction qui combine l'usage des méthodes **map()** et **flat()** mais en étant plus optimisée.
+
+#### 05 - Typage autour du hook useFetchQuery
+
+Typscript permet d'améliorer l'autocomplétion des IDE et surtout de créer toute une validation autour des éléments qui sont transmis.
+Nous allons donc mettre en place un nouveau type à l'intérieur du fichier **useFetchQuery** que nous allons nommer **API**.
+Ce nouveau type prendra en entrée les chemins d'appel à l'API, donc pour le moment nous allons définir le point d'entrée **/pokemon?limit=21**.
+Ensuite nous devons lister les éléments que nous renvoie l'API ainsi que le type associé, ici l'écriture la plus complexe est au niveau de la propriété
+**results**.
+`results: { name: string, url: string }[]` indique que nous allons recevoir plusieurs fois (donc un tableau) des objets contenant les propriétés **name** et **url**.
+
+```
+type API = {
+  "/pokemon?limit=21": {
+    count: number,
+    next: string | null,
+    previous: string | null,
+    results: { name: string, url: string }[]
+  }
+}
+```
+
+Ensuite, du coté de la déclaration des hooks nous allons pouvoir effectuer quelques modifications. Cela va consister nottamment en la mise en place de **generic**
+qui vont permettre toute la modularité de notre code.
+Un **generic** (ou générique en français) est une fonctionnalité qui permet de créer des composant réutilisables (donc nos hooks) pouvant fonctionner avec différents types sans pour autant sacrifier la sécurité du type. Donc on garde tout l'intérêt de la définition des types mais en gagnant en souplesse.
+
+```
+export function useFetchQuery<T extends keyof API>(path: T) {
+  return useQuery({
+    queryKey: [path],
+    queryFn: async () => {
+      // La fonction est un timer qui va nous permettre de simuler un périphèrique ou une connexion lente
+      await wait(1);
+
+      // Une fois le timer passer on retourne le résultat de l'appel API
+      return fetch(endpoint + path).then(r => r.json() as Promise<API[T]>)
+    }
+  })
+}
+```
+
+`<T extends keyof API>(path: T)` indique que nous créons un paramètre de type **T** qui aura comme héritage les clés du type **API**.
+Ensuite nous précisons que le paramètre **path** est de type **T**.
+`r => r.json() as Promise<API[T]>` indique que le hook nous retournera une pormise de type **API**.
