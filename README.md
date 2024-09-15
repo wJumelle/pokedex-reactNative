@@ -634,3 +634,48 @@ export function useFetchQuery<T extends keyof API>(path: T) {
 `<T extends keyof API>(path: T)` indique que nous créons un paramètre de type **T** qui aura comme héritage les clés du type **API**.
 Ensuite nous précisons que le paramètre **path** est de type **T**.
 `r => r.json() as Promise<API[T]>` indique que le hook nous retournera une pormise de type **API**.
+
+#### 05 - Création du lien pour accéder à la page du pokemon
+
+Pour la mise en place de cette navigation, nous allons nous resservir du composant `<Link />` d'expo-router, mais aussi d'un nouveau composant
+`<Pressable />` qui nous permettra d'inclure ce que l'on veut rendre cliquable.
+Voir la documentation autour de [**<Link>**](https://docs.expo.dev/router/navigating-pages/#buttons).
+Voir la documentation autour de [**<Pressable>**](https://reactnative.dev/docs/pressable).
+
+```
+function PokemonCard({style, id, name}: Props) {
+  const colors = useThemeColors();
+
+  return <Link href={{ pathname: "/pokemons/[id]", params: { id: id } }} asChild>
+    <Pressable>
+      <Card style={[style, styles.cardPokemon]}>
+        <ThemedText variant="caption" color="grayMedium" style={{alignSelf: 'flex-end'}}>#{id.toString().padStart(3, '0')}</ThemedText>
+        <Image source={{uri: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`}} style={styles.imgPokemon} />
+        <ThemedText color="grayDark">{capitalizeFirstLetter(name)}</ThemedText>
+        <View style={[styles.boxShadow, {backgroundColor: colors.grayBackground}]} />
+      </Card>
+    </Pressable>
+  </Link>
+}
+```
+
+La prop **asChild** nous permettre de transmettre l'intégralité des props reçu par le composant `<Link>` à son premier enfant, donc `<Pressable>`.
+La prop [**android_ripple**](https://reactnative.dev/docs/pressable#android_ripple-android) pourrait nous permettre de styliser l'intéraction avec l'élément intéractif.
+Elle prend en paramètre une couleur (avec **color**) et on peut spécifier si l'on souhaite voir l'intérieur en fond d'élément où devant (**foreground**). Nous dans notre cas il nous faudrait choisir **foreground: true** puisque nous avons un background défini sur nos cards.
+
+Nous constatons que l'affichage de notre grille est légèrement affectée par ces évolutions, cela s'explique par le fait que le `flex: 1/3` se joue actuellement sur
+le composant `<Card />` et non sur notre composant `<Link />` nous devons donc faire migrer notre **style** vers ce nouveau composant.
+
+```
+function PokemonCard({style, id, name}: Props) {
+  const colors = useThemeColors();
+
+  return <Link href={{ pathname: "/pokemons/[id]", params: { id: id } }} asChild style={style}>
+    [...]
+      <Card style={[styles.cardPokemon]}>
+        [...]
+      </Card>
+    </Pressable>
+  </Link>
+}
+```
