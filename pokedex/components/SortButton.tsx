@@ -1,11 +1,20 @@
 import useThemeColors from "@/hooks/useThemeColors";
 import { useState } from "react";
-import { Image, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Image, Modal, Pressable, StyleSheet, View } from "react-native";
+import ThemedText from "./ThemedText";
+import Card from "./Card";
+import Row from "./Row";
 
 type Props = {
   value: "id" | "name",
   onChange: (v: "id" | "name") => void
 }
+
+// Tableau permettant de simplifier l'affichage des boutons radios dans la modale
+const options = [
+  { label: "Number", value: "id" },
+  { label: "Name", value: "name" },
+]
 
 function SortButton({ value, onChange }: Props) {
   const colors = useThemeColors();
@@ -29,7 +38,16 @@ function SortButton({ value, onChange }: Props) {
         </View>
       </Pressable>
       <Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
-        <Text>Hello World</Text>
+        <Pressable style={styles.backdrop} onPress={onClose}></Pressable>
+        <View style={[styles.popup, { backgroundColor: colors.tint }]}>
+          <ThemedText variant="subtitle2" color="grayWhite" style={styles.popupTitle}>Sort by: </ThemedText>
+          <Card style={styles.popupCard}>
+            {options.map((o) => <Row key={o.value}>
+              <View />
+              <ThemedText color="grayDark">{o.label}</ThemedText>
+            </Row>)}
+          </Card>
+        </View>
       </Modal>
     </>
   )
@@ -43,6 +61,24 @@ const styles = StyleSheet.create({
     flex: 0,
     alignItems: "center",
     justifyContent: "center"
+  },
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, .3)"
+  },
+  popup: {
+    borderRadius: 12,
+    padding: 4,
+    paddingTop: 16,
+    gap: 16
+  },
+  popupTitle: {
+    paddingLeft: 20
+  },
+  popupCard: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    gap: 16
   }
 });
 

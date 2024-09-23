@@ -878,3 +878,57 @@ function SortButton({ value, onChange }: Props) {
   )
 }
 ```
+
+Nous cherchons maintenant à mettre en forme notre modale.
+Première étape, la mise en place d'un backdrop permettant de fermer la modale au clic.
+
+```
+<Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+  <Pressable style={styles.backdrop} onPress={onClose}></Pressable>
+  [...]
+</Modal>
+```
+
+Ensuite nous allons définir une `<View />` sous ce backdrop qui viendra se positionner par-dessus.
+Cette vue est composée du titre de la popup et d'un composant `<Card />` qui contiendra les boutons radios **number** et **name**.
+```
+<Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+  <Pressable style={styles.backdrop} onPress={onClose}></Pressable>
+  <View style={[styles.popup, { backgroundColor: colors.tint }]}>
+    <ThemedText variant="subtitle2" color="grayWhite" style={styles.popupTitle}>Sort by: </ThemedText>
+    <Card style={styles.popupCard}></Card>
+  </View>
+</Modal>
+```
+
+Pour mettre en place la liste des boutons radios nous allons concevoir en amont un tableau listant toutes les options que l'on utilisera ensuite à l'aide de la méthode **map()** pour concevoir la liste des choix.
+```
+const options = [
+  { label: "Number", value: "id" },
+  { label: "Name", value: "name" },
+]
+
+function SortButton({ value, onChange }: Props) {
+  [...]
+
+  return (
+    <>
+      [...]
+      <Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+        [...]
+        <View style={[styles.popup, { backgroundColor: colors.tint }]}>
+          [...]
+          <Card style={styles.popupCard}>
+            {options.map((o) => <Row key={o.value}>
+              <View />
+              <ThemedText color="grayDark">{o.label}</ThemedText>
+            </Row>)}
+          </Card>
+        </View>
+      </Modal>
+    </>
+  )
+}
+```
+
+Malheureusement en react native il n'y a pas de composant radio pré-existant. Nous allons donc devoir le créer.
