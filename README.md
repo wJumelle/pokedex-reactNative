@@ -779,3 +779,102 @@ const filteredPokemons = search ? pokemons.filter(p => p.name.toLowerCase().incl
 
 Lorsque l'on filtre on accède à un nombre restreint des pokémons et donc on déclenche l'événement **onEndReached** du composant `<FlatList />` automatiquement, ce qui exécute en boucle la query vers l'API afin de rechercher d'avantage de pokémon. Cela peut être l'effet voulu, personnelement je ne trouve pas cela déconnant.
 Dans le tutoriel suivi Grafikart bloque cette option tout simplement en modifiant la props **onEndReached** en précisant que si une recherche existe alors il ne faut rien faire `onEndReached={search ? undefined : () => fetchNextPage()}`.
+
+#### 06 - Mise en place du tri
+
+En général les APIs mettent en place ce genre de tri dans le paramétrage de leurs requêtes, ici nous sommes limités par l'API donc nous allons devoir les développer nous même.
+
+Nous allons donc créer le nouveau composant `<SortButton />` dans lequel nous allons gérer deux props **value** et **onChange**.
+
+```
+// Fichier SortButton.tsx
+type Props = {
+  value: "id" | "name",
+  onChange: (v: "id" | "name") => void
+}
+
+function SortButton({ value, onChange }: Props) {
+  return (
+    <View>
+      <Text>{value}</Text>
+    </View>
+  )
+}
+```
+
+Les props **value** et **onChange** correspondront à un état transmis au composant via la page **index.tsx**.
+Lors de la définition de cet état, nous devons de nouveau préciser les deux cas attendus possibles : `const [ sortKey, setSortKey ] = useState<"id" | "name">("id");`.
+Si on ne définit pas ces deux cas spécifiques nous risquons de nous retrouver avec une erreur dans notre logiciel de programmation, aucune erreur en Front.
+
+Maintenant nous allons chercher à rendre fonctionnel notre système de tri.
+Pour cela dans un premier temps on va venir modifier le tableau des pokémons afin d'obtenir directement l'**id** en temps que propriété de chaque pokémon, plutot que d'appeler à chaque fois la fonction **getPokemonId()**.
+```
+const pokemons = data?.pages.flatMap(page => page.results.map(r => ({ name: r.name, id: getPokemonId(r.url) }))) ?? [];
+
+// Ce qui nous permet de changer la propriété renderItem de notre FlatList
+// Au niveau de notre keyExtractor, c'est une chaine de caractère qui est attendue, donc nous devons convertir l'id en string.
+<FlatList
+  [...]
+  renderItem={({item}) => <PokemonCard id={item.id} name={item.name} style={{flex: 1/3}} />} keyExtractor={(item) => item.id.toString()}
+/>
+```
+
+Ensuite nous nous attaquons à la refactorisation du tableau **filteredPokemons[]**.
+Nous précision donc que notre tableau contiendra à chaque fois un nouveau tableau conçu à partir des données filtrées via **search** ou bien **pokemons** si rien n'a été saisi dans le champ de recherche. Et que sur ce tableau nous appliquerons la méthode **sort()** en nous basant sur **sortKey**.
+```
+const filteredPokemons = [
+  ...(search
+    ? pokemons.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.id.toString() === search)
+    : pokemons)
+].sort((a, b) => (a[sortKey] < b[sortKey] ? -1 : 1));
+```
+
+Pour gérer le switch entre les deux icons différentes à afficher, nous alons surveiller la propriété **value** en fonction de laquelle nous allons faire évoluer notre require.
+```
+function SortButton({ value, onChange }: Props) {
+  const colors = useThemeColors();
+
+  return (
+    <View style={[styles.button, { backgroundColor: colors.grayWhite }]}>
+      <Image source={
+        value === "id" ?
+        require("@/assets/images/number--red.png") :
+        require("@/assets/images/alpha--red.png")
+      } width={16} height={16} />
+    </View>
+  )
+}
+```
+
+Maintenant nous voulons rendre notre composant cliquable, nous allons donc utiliser le même composant que pour les cards pokémons : [`<Pressable />`](https://reactnative.dev/docs/pressable).
+Ce dernier écoute la propriété **onPress** qui nous permettra de lui passer une fonction à exécuter.
+Lors du clic nous souhaitons faire apparaitre une fenêtre permettant de choisir entre les options : "number" ou "name". Dans React native il existe un composant pour cela qui s'appelle [`<Modal />`](https://reactnative.dev/docs/modal).
+
+Plusieurs propriétés nous intéressent :
+* la propriété **transparent** permet d'indiquer que lon souhaite une modale sur font transparent
+* la propriété **visible** sera une propriété qui devra évoluer en fonction d'un état du composant `<SortButton />`
+* la propriété **onRequestClose** est obligatoire
+* la prorpéité **animationType** permet de gérer la façon dont va s'afficher la modal
+```
+function SortButton({ value, onChange }: Props) {
+  const colors = useThemeColors();
+  const [ isModalVisible, setModalVisibility ] = useState(false);
+  const onButtonPress = () => {
+    setModalVisibility(true);
+  }
+  const onClose = () => {
+    setModalVisibility(false);
+  }
+
+  return (
+    <>
+      <Pressable onPress={onButtonPress}>
+        [...]
+      </Pressable>
+      <Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+        <Text>Hello World</Text>
+      </Modal>
+    </>
+  )
+}
+```
