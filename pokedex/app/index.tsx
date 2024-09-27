@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     padding: 12,
     paddingBottom: 8
   },
-  searchBar: {
+  form: {
     paddingBottom: 24,
     paddingHorizontal: 12
   },
@@ -60,7 +60,7 @@ export default function Index() {
           <Image source={require("@/assets/images/pokeball-white.png")} style={styles.tinyLogo} />
           <ThemedText variant="headline" color="grayWhite">Pokedex</ThemedText>
         </Row>
-        <Row style={styles.searchBar} gap={16}>
+        <Row style={styles.form} gap={16}>
           <SearchBar value={search} onChange={setSearch}></SearchBar>
           <SortButton value={sortKey} onChange={setSortKey}></SortButton>
         </Row>

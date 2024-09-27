@@ -1002,3 +1002,69 @@ function SortButton({ value, onChange }: Props) {
   )
 }
 ```
+
+Maintenant nous allons chercher à positionner la popup au niveau de l'élément d'inteface `<SortButton />`.
+Pour cela nous allons avoir besoin d'un concept de React : les [**Refs**](https://fr.react.dev/reference/react/useRef).
+Une référence est quelque chose qui n'est pas nécessaire à l'affichage et de par sa définition c'est donc une variable que l'on va
+pouvoir éditer, à l'aide de sa propriété **current**, sans pour autant entrainer un nouveau rendu de l'affichage.
+
+**useRef** va donc nous permettre ici de stocker la valeur de la position de notre bouton `<SortButton />` afin d'en déduire le positionnement de la popup.
+Nous informons notre éditeur de code que nous attendons comme future valeur une `<View>`, par défault **ref** est null.
+Comme la référence **buttonRef** permet de mémoriser la position du bouton nous allons déposer la propriété **ref** sur la `<View />` à l'intérieur du premier `<Pressable />`.
+
+Ce composant `<Pressable />` appelle la méthode **onButtonPress** à l'aide de sa propriété **onPress**. C'est à l'intérieur de cette méthode que l'on va venir récupérer les valeurs de positionnement.
+Nous créons donc un état **position** qui sera mis à jour à l'aide de la méthode **setPosition** à l'intérieur de la méthode **onButtonPress**.
+Lors du clic, on vérifie que la propriété **current** de la référence existe, si oui alors à l'aide de la méthode asynchrone [**measureInWindow**](https://reactnative.dev/docs/direct-manipulation#measureinwindowcallback) nous allons pouvoir exécuter une fonction de callback avec tout un tas de paramètre qui nous intéresse : x, y, width et height correspondant aux positions et dimensions de la `<View>` donnée (ici **buttonRef.current**).
+
+A l'aide de ce callback nous allons appeler **setPosition** à l'intérieur de laquelle nous allons nous servir de [**Dimensions**](https://reactnative.dev/docs/dimensions) pour récupérer la taille du périphérique de nous utilisons.
+En effet, rien de bien compliquer pour le calcul de la propriété **top** mais pour celle de **right** c'est moins évident.
+Nous allons donc soustraire à la taille de l'écran la position x de la référence et sa largeur.
+
+```
+function SortButton({ value, onChange }: Props) {
+  [...]
+  const buttonRef = useRef<View>(null);
+  [...]
+  const [ position, setPosition ] = useState<null | { top: number, right: number}>(null);
+  const onButtonPress = () => {
+    buttonRef.current?.measureInWindow((x, y, width, height) => {
+      setPosition({
+        top: y + height + 8,
+        right: Dimensions.get("window").width - x - width
+      })
+      setModalVisibility(true);
+    });
+  }
+  [...]
+
+  return (
+    <>
+      <Pressable onPress={onButtonPress}>
+        <View ref={buttonRef} style={[styles.button, { backgroundColor: colors.grayWhite }]}>
+          [...]
+        </View>
+      </Pressable>
+      <Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+        [...]
+        <View style={[styles.popup, { backgroundColor: colors.tint, ...position }]}>
+          [...]
+        </View>
+      </Modal>
+    </>
+  )
+}
+
+const styles = StyleSheet.create({
+  [...]
+  popup: {
+    position: "absolute",
+    width: 113,
+    borderRadius: 12,
+    padding: 4,
+    paddingTop: 16,
+    gap: 16,
+    ...Shadows.dp2
+  },
+  [...]
+})
+```
