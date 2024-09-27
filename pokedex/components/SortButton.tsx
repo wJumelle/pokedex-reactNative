@@ -4,6 +4,7 @@ import { Image, Modal, Pressable, StyleSheet, View } from "react-native";
 import ThemedText from "./ThemedText";
 import Card from "./Card";
 import Row from "./Row";
+import Radio from "./Radio";
 
 type Props = {
   value: "id" | "name",
@@ -14,7 +15,7 @@ type Props = {
 const options = [
   { label: "Number", value: "id" },
   { label: "Name", value: "name" },
-]
+] as const;
 
 function SortButton({ value, onChange }: Props) {
   const colors = useThemeColors();
@@ -42,10 +43,12 @@ function SortButton({ value, onChange }: Props) {
         <View style={[styles.popup, { backgroundColor: colors.tint }]}>
           <ThemedText variant="subtitle2" color="grayWhite" style={styles.popupTitle}>Sort by: </ThemedText>
           <Card style={styles.popupCard}>
-            {options.map((o) => <Row key={o.value}>
-              <View />
-              <ThemedText color="grayDark">{o.label}</ThemedText>
-            </Row>)}
+            {options.map((o) => <Pressable onPress={() => onChange(o.value)} key={o.value}>
+              <Row gap={8}>
+                <Radio checked={o.value === value} />
+                <ThemedText color="grayDark">{o.label}</ThemedText>
+              </Row>
+            </Pressable>)}
           </Card>
         </View>
       </Modal>

@@ -932,3 +932,73 @@ function SortButton({ value, onChange }: Props) {
 ```
 
 Malheureusement en react native il n'y a pas de composant radio pré-existant. Nous allons donc devoir le créer.
+Un radio button c'est rien de bien compliqué : un cercle avec une bordure contenant un deuxième plus petit cercle, et ça on sait déjà le faire !
+
+```
+import useThemeColors from "@/hooks/useThemeColors";
+import { StyleSheet, View } from "react-native";
+
+type Props = {
+  checked: boolean
+}
+
+function Radio({ checked }: Readonly<Props>) {
+  const colors = useThemeColors();
+
+  return (
+    <View style={[styles.radio, { borderColor: colors.tint }]}>
+      {checked && <View style={[styles.radioInner, { backgroundColor: colors.tint }]}/>}
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  radio: {
+    width: 14,
+    height: 14,
+    borderStyle: "solid",
+    borderWidth: 2,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  radioInner: {
+   width: 5,
+   height: 5,
+   borderRadius: 5
+  }
+});
+
+export default Radio;
+```
+
+Ici la petite subtilité va se jouer au niveaud du composant `<SortButton />`.
+Nous souhaitons rendre l'intégralité de la ligne cliquable, donc le composant `<Pressable />` va se trouver autour de la `<Row />` rendue par la méthode **map()**.
+Pour définir l'état du radio button nous nous servons de l'égalité `o.value === value` ce qui implique que si l'état **sortKey** est égale à la valeur du bouton radio alors celui-ci apparait coché.
+C'est la propriété **onPress** qui va nous permettre d'appeler **onChange** qui n'est rien d'autre que **setSortKey** transmis à `<SortButton />`.
+
+```
+function SortButton({ value, onChange }: Props) {
+  [...]
+
+  return (
+    <>
+      [...]
+      <Modal transparent visible={isModalVisible} onRequestClose={onClose} animationType="fade">
+        <Pressable style={styles.backdrop} onPress={onClose}></Pressable>
+        <View style={[styles.popup, { backgroundColor: colors.tint }]}>
+          [...]
+          <Card style={styles.popupCard}>
+            {options.map((o) => <Pressable onPress={() => onChange(o.value)} key={o.value}>
+              <Row gap={8}>
+                <Radio checked={o.value === value} />
+                <ThemedText color="grayDark">{o.label}</ThemedText>
+              </Row>
+            </Pressable>)}
+          </Card>
+        </View>
+      </Modal>
+    </>
+  )
+}
+```
