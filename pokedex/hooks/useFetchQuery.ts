@@ -8,19 +8,39 @@ type API = {
     next: string | null,
     previous: string | null,
     results: { name: string, url: string }[]
+  },
+  "/pokemon/[id]": {
+    id: number,
+    name: string,
+    url: string,
+    weight: number,
+    height: number,
+    moves: {move: { name: string }}[],
+    stats: {
+      base_stat: number,
+      stat: { name: string }
+    }[],
+    cries: {
+      latest: string
+    },
+    types: {
+      type: { name: string}
+    }[]
   }
 }
 
 // Création du hook
-export function useFetchQuery<T extends keyof API>(path: T) {
+export function useFetchQuery<T extends keyof API>(path: T, params?: Record<string, string | number>) {
+  const localUrl = endpoint + Object.entries(params ?? {}).reduce((acc, [key, value]) => acc.replaceAll(`[${key}]`, value), path);
+
   return useQuery({
-    queryKey: [path],
+    queryKey: [localUrl],
     queryFn: async () => {
       // La fonction est un timer qui va nous permettre de simuler un périphèrique ou une connexion lente
       await wait(1);
 
       // Une fois le timer passer on retourne le résultat de l'appel API
-      return fetch(endpoint + path).then(r => r.json() as Promise<API[T]>)
+      return fetch(localUrl).then(r => r.json() as Promise<API[T]>)
     }
   })
 }

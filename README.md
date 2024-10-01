@@ -1068,3 +1068,93 @@ const styles = StyleSheet.create({
   [...]
 })
 ```
+### 08 - Création de la vue de détail d'un Pokémon
+
+Pour cette nouvelle vue nous allons encore avoir besoin du composant `<SafeAreaView />`, qui nous permet rappelons-le, d'afficher notre app dans l'espace disponible, donc sans mordre sur la caméra etc. Lorsque l'on importe notre composant `<SafeAreaView />` il faut bien faire attention à importer celui de **react-native-safe-area-context** et non celui de **react-native**.
+Comme nous avons encore besoin de l'élément et que nous allons devoir le configurer exactement de la même manière que pour la view du listing des pokémons nous allons créer un composant `<RootView />` qui nous permettra de configurer tout en un seul endroit.
+On récupère donc le **style** associé au container dans la page **index.tsx** que l'on ajoute à l'intérieur du composant en le nommant **rootStyle**.
+Autant les **Props** que le **style** vont devoir satisfaire les règles d'écritures liées aux View.
+
+```
+import useThemeColors from "@/hooks/useThemeColors";
+import { ViewProps, ViewStyle } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+type Props = ViewProps;
+
+const rootStyle = {
+  flex: 1,
+  padding: 4
+} satisfies ViewStyle;
+
+function RootView({style, ...rest}: Props) {
+  const colors = useThemeColors();
+
+  return (
+    <SafeAreaView style={[rootStyle, {backgroundColor: colors.tint}]} {...rest} />
+  )
+}
+
+export default RootView;
+```
+
+Maintenant que l'on a créé ce nouveau composant, on peut venir le remplacer dans la page **index.tsx** et s'en servir dans la page **/pokemons/[id].tsx**.
+On met rapidement en place la barre de header de cette page avec les différents éléments dont on va avoir besoin.
+Pour l'instant ces éléments sont statiques. Nous allons devoir efferctuer des apppels APIs pour récupérer les données de manière dynamique.
+
+```
+const styles = StyleSheet.create({
+  header: {
+    margin: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  title: {
+    flex: 1
+  }
+});
+
+function Pokemon() {
+  const params = useLocalSearchParams() as {id: string};
+  const colors = useThemeColors();
+
+  function goBack() {
+    alert('goBack');
+  }
+
+  return (
+    <RootView>
+      <Row style={styles.header} gap={8}>
+        <Pressable>
+          <Image source={require("@/assets/images/arrow_back-white.png")} width={32} height={32}></Image>
+        </Pressable>
+        <ThemedText variant="headline" color="grayWhite" style={styles.title}>Pikachu</ThemedText>
+        <ThemedText variant="subtitle2" color="grayWhite">#{params.id.toString().padStart(3, '0')}</ThemedText>
+      </Row>
+    </RootView>
+  )
+}
+
+export default Pokemon;
+```
+
+Pour récupérer ces données nous allons devoir ajouter un nouveau **endpoint** au type **API** de notre hook **useFetchQuery**.
+Pour mettre en place ce nouveau **endpoint** nous allons tout simplement lire les données de [**bulbizarre**](https://pokeapi.co/api/v2/pokemon/1/) afin de définir celle qui nous intéressent en fonction de la maquette.
+
+La problématique étant que notre nouvelle entrée va contenir l'id du pokémon dont on souhaite obtenir les données. Nous avons donc ajouté `"/pokemon/[id]": {}` à notre **type API**.
+Comment pouvons nous rendre cette partie dynamique ? Pour cela nous allons devoir réadapter notre hook en lui précisant que l'on va pouvoir lui passer un second paramètre optionnel : **params**. Ce paramètre sera un [**Record**](https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type) configuré de la sorte `params?: Record<string, string | number>`.
+Un **Record** `Record<Keys, Type>` est tout simplement un objet dont les clés seront **Keys** et les valeurs seront **Type**. Dans notre cas nous ciblons l'id (qui est donc une chaine de caractère) dont la valeur sera possiblement un nombre ou une chaine de caractère.
+Ce qui nous permet de modifier l'appel à notre hook `const { data } = useFetchQuery('/pokemon/[id]', {id: params.id});`.
+
+Maintenant au niveau du hook nous devons traiter la donnée pour pouvoir la passer à l'appel.
+Pour se faire on va avoir besoin de plusieurs méthode de JavaScript :
+* [**Object.entries()**](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Object/entries), est une méthode qui renvoie un tableau des propriétés propres énumérables d'un objet dont la clé est une chaine de caractères, sous la forme de paire `[clé, valeur]` dans le même ordre qu'une boucle **for...in**. La différence étant que la boucle for...in parcourt la chaine des prototypes, c'est à dire qu'elle inclut les propriétés héritées.
+* [**Reduce**](https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce), est une méthode qui applique une fonction qui est un **accumulateur** et qui traite chaque élément d'une liste de la gauche vers la droite afin de la réduire à une seule valeur.
+Ex: `array1.reduce((accumulator, value) => accumulator + value, inititalValue)`.
+
+Dans notre cas notre liste à traiter à l'aide de **Reduce** est le tableau renvoyé par **Object.entries()**. Comme dit plus haut c'est un tableau au format `[clé, valeur]`.
+Nous allons donc écrire notre reduce de la façon suivante `Object.entries(params ?? {}).reduce((acc, [key, value]) => acc.replaceAll(`[${key}]`, value), path)`.
+La valeur par défaut de notre accumulateur sera **path** qui correspond au chemin transmis à **useFetchQuery**. On va donc vouloir remplacer **[id]** par la **value** à l'aide de la méthode **replaceAll()**.
+
+Pour revenir en arrière, nous allons mettre en place un composant `<Pressable />` autour de la flèche de notre interface et **onPress** nous allons utiliser une méthode de **expo-router** qui s'appelle **back**. Cette méthode permet tout simplement de remonter d'un cran dans la pile de navigation.
