@@ -1158,3 +1158,5 @@ Nous allons donc écrire notre reduce de la façon suivante `Object.entries(para
 La valeur par défaut de notre accumulateur sera **path** qui correspond au chemin transmis à **useFetchQuery**. On va donc vouloir remplacer **[id]** par la **value** à l'aide de la méthode **replaceAll()**.
 
 Pour revenir en arrière, nous allons mettre en place un composant `<Pressable />` autour de la flèche de notre interface et **onPress** nous allons utiliser une méthode de **expo-router** qui s'appelle **back**. Cette méthode permet tout simplement de remonter d'un cran dans la pile de navigation.
+
+JOOURNEE OFF.
