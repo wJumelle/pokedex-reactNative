@@ -5,6 +5,9 @@ Initiation à React Native autour d'un projet fun : objectif création d'un Poke
 
 ### Initialisation du projet
 
+Version de node : 22.3.0.
+Version de npm : 8.11.0.
+
 On commence par vérifier que nous sommes bien dans une version stable (LTS) de Node.js.
 Pour cela ouvrir **PowerShell** et checker la version de node à l'aide de la commande `node -v`.
 En version non-LTS beaucoup de problèmes s'ajoutent et rendent le développement complexe.
@@ -1159,4 +1162,31 @@ La valeur par défaut de notre accumulateur sera **path** qui correspond au chem
 
 Pour revenir en arrière, nous allons mettre en place un composant `<Pressable />` autour de la flèche de notre interface et **onPress** nous allons utiliser une méthode de **expo-router** qui s'appelle **back**. Cette méthode permet tout simplement de remonter d'un cran dans la pile de navigation.
 
-JOOURNEE OFF.
+#### 09 - Variation de la couleurs de fond en fonction du type de pokémon
+
+Pour effectuer ce changement nous allons avoir besoin de deux choses :
+* du fichier de constante **/constants/Colors.tsx** stocké dans notre app.
+* d'au moins un type pour chaque pokémon ; nous allons prendre le premier si le pokémon en possède plusieurs
+
+A l'intérieur de **/constants/Colors.tsx** nous avons un objet **types** qui répertorie les codes hexadécimal correspondant au nom anglais d'un type.
+Donc si on croise les données de l'API avec notre fichier de constante nous pouvons obtenir le code hexadécimal que l'on recherche.
+Par défaut nous choisirons d'afficher notre page de détail avec la couleur rouge.
+
+```
+const mainType = pokemon?.types?.[0].type.name;
+const colorType = mainType ? Colors.types[mainType] : colors.tint;
+```
+
+Nous devons ensuite corriger la déclaration du type API dans notre fichier de hook **useFecthQuery** de sorte à indiquer que l'on attend un **keyof typeof** de **Colors["types"]**.
+
+```
+type API = {
+  "/pokemon?limit=21": { [...] },
+  "/pokemon/[id]": {
+    [...]
+    types: {
+      type: { name: keyof typeof Colors["types"]}
+    }[]
+  }
+}
+```

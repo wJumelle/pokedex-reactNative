@@ -1,3 +1,4 @@
+import { Colors } from "@/constants/Colors";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 const endpoint = "https://pokeapi.co/api/v2"
@@ -24,7 +25,7 @@ type API = {
       latest: string
     },
     types: {
-      type: { name: string}
+      type: { name: keyof typeof Colors["types"]}
     }[]
   }
 }

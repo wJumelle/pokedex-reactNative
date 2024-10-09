@@ -13,7 +13,7 @@ function RootView({style, ...rest}: Props) {
   const colors = useThemeColors();
 
   return (
-    <SafeAreaView style={[rootStyle, {backgroundColor: colors.tint}]} {...rest} />
+    <SafeAreaView style={[rootStyle, {backgroundColor: colors.tint}, style]} {...rest} />
   )
 }
 
