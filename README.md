@@ -1190,3 +1190,25 @@ type API = {
   }
 }
 ```
+
+#### 09 - Affichage de l'artwork du pokemon
+
+Pour afficher l'artwork du pokemon nous nous rendons compte que nous allons utiliser la même technique que pour la page de liste, donc nous allons créer une nouvelle fonction dans le fichier **pokemon.ts** afin de centraliser la méthode.
+
+La fonction **getPokemonArtwork** va donc attendre en paramètre un id de type **number | string** et retourner le chemin vers l'image.
+
+```
+export function getPokemonArtwork(id: number | string) : string {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+```
+
+Une fois cela fait il ne nous reste plus qu'à modifier le composant `<PokemonCard />` et à ajouter l'image dans la vue de détail.
+
+```
+// PokemonCard.tsx
+<Image source={{uri: getPokemonArtwork(id)}} style={styles.imgPokemon} />
+
+//[id].tsx
+<Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+```
