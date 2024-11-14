@@ -1,3 +1,4 @@
+import Card from "@/components/Card";
 import RootView from "@/components/RootView";
 import Row from "@/components/Row";
 import ThemedText from "@/components/ThemedText";
@@ -20,9 +21,12 @@ const styles = StyleSheet.create({
     flex: 1
   },
   artwork: {
+    position: 'absolute',
+    top: -144,
     alignSelf: "center",
     width: 200,
-    height: 200
+    height: 200,
+    zIndex: 5,
   },
   pokeball_bkg: {
     position: "absolute",
@@ -31,6 +35,14 @@ const styles = StyleSheet.create({
     opacity: .1,
     width: 206,
     height: 208
+  },
+  body: {
+    marginTop: 144,
+  },
+  card: {
+    flex: 1,
+    padding: 20,
+    paddingTop: 56
   }
 });
 
@@ -53,7 +65,12 @@ function Pokemon() {
           <ThemedText variant="headline" color="grayWhite" style={styles.title}>{pokemon?.name ? capitalizeFirstLetter(pokemon.name) : ''}</ThemedText>
           <ThemedText variant="subtitle2" color="grayWhite">#{params.id.toString().padStart(3, '0')}</ThemedText>
         </Row>
-        <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+        <View style={styles.body}>
+          <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+          <Card style={styles.card}>
+            <ThemedText>Bonjour les gens</ThemedText>
+          </Card>
+        </View>
       </View>
     </RootView>
   )

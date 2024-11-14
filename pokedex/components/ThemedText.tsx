@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/Colors";
 import useThemeColors from "@/hooks/useThemeColors";
+import React from "react";
 import { StyleSheet, Text, TextProps } from "react-native";
 
 const styles = StyleSheet.create({

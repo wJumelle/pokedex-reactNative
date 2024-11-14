@@ -1,6 +1,7 @@
 import { Image, StyleSheet, TextInput } from "react-native";
 import Row from "@/components/Row";
 import useThemeColors from "@/hooks/useThemeColors";
+import React from "react";
 
 // On définit les props liés à SearchBar
 // value sera la valeur récupéré par le formulaire

@@ -4,6 +4,7 @@ import ThemedText from "../ThemedText";
 import useThemeColors from "@/hooks/useThemeColors";
 import { capitalizeFirstLetter, getPokemonArtwork } from "@/functions/pokemons";
 import { Link } from "expo-router";
+import React from "react";
 
 const styles = StyleSheet.create({
   cardPokemon: {

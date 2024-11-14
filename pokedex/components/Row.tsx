@@ -1,3 +1,4 @@
+import React from "react";
 import { View, ViewProps, ViewStyle } from "react-native";
 
 type Props = ViewProps & {

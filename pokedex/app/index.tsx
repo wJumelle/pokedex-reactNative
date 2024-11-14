@@ -9,6 +9,7 @@ import { Shadows } from "@/constants/Shadows";
 import { getPokemonId } from "@/functions/pokemons";
 import { useInfiniteFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
+import React from "react";
 import { useState } from "react";
 import { ActivityIndicator, FlatList, Image, StyleSheet } from "react-native";
 
