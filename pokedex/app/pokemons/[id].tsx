@@ -1,4 +1,5 @@
 import Card from "@/components/Card";
+import PokemonType from "@/components/pokemon/PokemonType";
 import RootView from "@/components/RootView";
 import Row from "@/components/Row";
 import ThemedText from "@/components/ThemedText";
@@ -11,6 +12,9 @@ import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   headerBar: {
     padding: 20,
     flexDirection: "row",
@@ -37,12 +41,17 @@ const styles = StyleSheet.create({
     height: 208
   },
   body: {
+    flex: 1,
     marginTop: 144,
   },
   card: {
     flex: 1,
     padding: 20,
-    paddingTop: 56
+    paddingTop: 56,
+  },
+  card_row: {
+    justifyContent: 'center',
+    gap: 16
   }
 });
 
@@ -52,11 +61,12 @@ function Pokemon() {
   const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
   const mainType = pokemon?.types?.[0].type.name;
   const colorType = mainType ? Colors.types[mainType] : colors.tint;
+  const types = pokemon?.types ?? [];
   console.log({mainType, colorType});
 
   return (
     <RootView style={ {backgroundColor: colorType} }>
-      <View>
+      <View style={styles.container}>
         <Image source={require("@/assets/images/pokeball_big.png")} style={styles.pokeball_bkg} />
         <Row style={styles.headerBar} gap={8}>
           <Pressable onPress={router.back}>
@@ -68,7 +78,9 @@ function Pokemon() {
         <View style={styles.body}>
           <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
           <Card style={styles.card}>
-            <ThemedText>Bonjour les gens</ThemedText>
+            <Row style={styles.card_row}>
+              {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}
+            </Row>
           </Card>
         </View>
       </View>
