@@ -6,6 +6,7 @@ import { capitalizeFirstLetter, getPokemonArtwork } from "@/functions/pokemons";
 import { useFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
 import { router, useLocalSearchParams } from "expo-router";
+import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 
 const styles = StyleSheet.create({
