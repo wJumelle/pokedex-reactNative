@@ -46,12 +46,15 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
+    gap: 16,
     padding: 20,
     paddingTop: 56,
   },
   card_row: {
-    justifyContent: 'center',
-    gap: 16
+    justifyContent: 'center'
+  },
+  subtitle: {
+    textAlign: 'center',
   }
 });
 
@@ -78,9 +81,11 @@ function Pokemon() {
         <View style={styles.body}>
           <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
           <Card style={styles.card}>
-            <Row style={styles.card_row}>
+            <Row style={styles.card_row} gap={16}>
               {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}
             </Row>
+            <ThemedText variant="subtitle1" style={[styles.subtitle, {color: colorType}]}>About</ThemedText>
+            <ThemedText variant="subtitle1" style={[styles.subtitle, {color: colorType}]}>Base stats</ThemedText>
           </Card>
         </View>
       </View>
