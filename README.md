@@ -1332,5 +1332,57 @@ function Pokemon() {
 La partie un peu plus tricky se trouve au niveau des dernières specs : les movesets. En effet nous devons réaliser une suite d'opération afin d'obtenir les données
 souhaités `<PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />`.
 
+Maintenant il ne nous reste plus qu'à afficher la courte description du pokémon. Pour cela nous allons nous servir d'un nouvel **endpoint** de l'API : **pokemon-species**.
+Qui dit nouvel appel à l'API dit forcément définition de ce endpoint dans le fichier du hook **useFetchQuery.ts**.
+Au niveau de l'api, les données qui vont nous intéresser se situe dans le JSON au niveau de **flavor_text**, du language que l'on souhaite.
+Pour l'instant nous partons sur une interface en anglais donc nous ne récupérons que les données en anglais.
+
+```
+"/pokemon-species/[id]": {
+  flavor_text_entries: {
+    flavor_text: string,
+    language: {
+      name: string
+    }
+  }[]
+}
+```
+
+Du coté du fichier **[id].tsx** nous allons effectuer notre nouvel appel ainsi que créer la constante **bio** à l'aide des données récupérées.
+
+```
+function Pokemon() {
+  [...]
+  const params = useLocalSearchParams() as {id: string};
+  [...]
+  const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: params.id});
+  [...]
+  const bio = species?.flavor_text_entries?.find(({language}) => language.name === "en")?.flavor_text.replaceAll("\n", " ").replaceAll("\f", "\n");
+
+  return (
+    <RootView style={ {backgroundColor: colorType} }>
+      <View style={styles.container}>
+        [...]
+        <View style={styles.body}>
+          [...]
+          <Card style={styles.card}>
+            [...]
+
+            {/* About */}
+            [...]
+            <ThemedText>{bio}</ThemedText>
+          </Card>
+        </View>
+      </View>
+    </RootView>
+  )
+}
+```
+
+Encore une fois au niveau de la constante **bio** c'est un peu technique de récupérer les bonnes données, nous allons étudier la ligne `const bio = species?.flavor_text_entries?.find(({language}) => language.name === "en")?.flavor_text.replaceAll("\n", " ").replaceAll("\f", "\n");` de manière plus précise.
+[**find()**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find) est une méthode JavaScript permettant de retourner le premier élément d'un tableau qui satisfait la fonction de test passé en paramètre. Ici notre fonction de test va regarder tout simplement la valeur du language présent dans l'élément du tableau, si l'élément est celui correspondant au `language === en` alors la méthode renvoie cet élément.
+Ensuite à l'intérieur de cet élément nous effectuons deux fonctions de nettoyage afin de proprement afficher le contenu textuel.
+
 ## ToDo
 * Récupérer le nom des moves proprement via l'API
+* Réaliser la traduction de l'app en français

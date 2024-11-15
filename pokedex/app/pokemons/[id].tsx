@@ -61,9 +61,11 @@ function Pokemon() {
   const colors = useThemeColors();
   const params = useLocalSearchParams() as {id: string};
   const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
+  const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: params.id});
   const mainType = pokemon?.types?.[0].type.name;
   const colorType = mainType ? Colors.types[mainType] : colors.tint;
   const types = pokemon?.types ?? [];
+  const bio = species?.flavor_text_entries?.find(({language}) => language.name === "en")?.flavor_text.replaceAll("\n", " ").replaceAll("\f", "\n");
   console.log({mainType, colorType});
 
   return (
@@ -83,12 +85,17 @@ function Pokemon() {
             <Row style={styles.card_row} gap={16}>
               {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}
             </Row>
+
+            {/* About */}
             <ThemedText variant="subtitle1" style={{color: colorType}}>About</ThemedText>
             <Row>
               <PokemonSpec title={formatWeight(pokemon?.weight)} description="Weight" image={require("@/assets/images/weight.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
               <PokemonSpec title={formatWeight(pokemon?.height)} description="Height" image={require("@/assets/images/straighten.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
               <PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />
             </Row>
+            <ThemedText>{bio}</ThemedText>
+
+            {/* Base stats */}
             <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
           </Card>
         </View>
