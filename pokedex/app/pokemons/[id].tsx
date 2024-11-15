@@ -1,10 +1,11 @@
 import Card from "@/components/Card";
+import PokemonSpec from "@/components/pokemon/PokemonSpec";
 import PokemonType from "@/components/pokemon/PokemonType";
 import RootView from "@/components/RootView";
 import Row from "@/components/Row";
 import ThemedText from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
-import { capitalizeFirstLetter, getPokemonArtwork } from "@/functions/pokemons";
+import { capitalizeFirstLetter, formatWeight, getPokemonArtwork } from "@/functions/pokemons";
 import { useFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
 import { router, useLocalSearchParams } from "expo-router";
@@ -47,14 +48,12 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     gap: 16,
+    alignItems: 'center',
     padding: 20,
     paddingTop: 56,
   },
   card_row: {
     justifyContent: 'center'
-  },
-  subtitle: {
-    textAlign: 'center',
   }
 });
 
@@ -84,8 +83,13 @@ function Pokemon() {
             <Row style={styles.card_row} gap={16}>
               {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}
             </Row>
-            <ThemedText variant="subtitle1" style={[styles.subtitle, {color: colorType}]}>About</ThemedText>
-            <ThemedText variant="subtitle1" style={[styles.subtitle, {color: colorType}]}>Base stats</ThemedText>
+            <ThemedText variant="subtitle1" style={{color: colorType}}>About</ThemedText>
+            <Row>
+              <PokemonSpec title={formatWeight(pokemon?.weight)} description="Weight" image={require("@/assets/images/weight.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
+              <PokemonSpec title={formatWeight(pokemon?.height)} description="Height" image={require("@/assets/images/straighten.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
+              <PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />
+            </Row>
+            <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
           </Card>
         </View>
       </View>

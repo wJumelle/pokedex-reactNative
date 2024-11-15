@@ -1212,3 +1212,125 @@ Une fois cela fait il ne nous reste plus qu'à modifier le composant `<PokemonCa
 //[id].tsx
 <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
 ```
+
+#### 10 - Affichage des types
+
+Pour gérer l'affichage des types nous avons crées un nouveau composant `<PokemonType />`.
+A l'intérieur de ce composant nous allons nous servir du **nom** du type afin d'aller chercher la couleur correspondante dans nos
+constantes **Colors**.
+
+```
+type Props = {
+  name: keyof (typeof Colors)["types"];
+}
+
+function PokemonType({name}: Props) {
+  return (
+    <View style={[rootStyle, { backgroundColor: Colors.types[name] }]}>
+      <ThemedText color={"grayWhite"} variant={"subtitle3"}>{capitalizeFirstLetter(name)}</ThemedText>
+    </View>
+  )
+}
+```
+
+Au niveau de la page **[id].tsx** nous allons parcourir les types transmis par l'API à l'intérieur d'un composant `<Row />`.
+Lors du chargement des données, nous n'avons pas encore les données **types** donc il ne faut pas oublier d'initialiser la constante à
+un tableau de données vide.
+
+```
+function Pokemon() {
+  [...]
+  const types = pokemon?.types ?? [];
+  [...]
+
+  return (
+    <RootView style={ {backgroundColor: colorType} }>
+      <View style={styles.container}>
+        [...]
+        <View style={styles.body}>
+          [...]
+          <Card style={styles.card}>
+            <Row style={styles.card_row} gap={16}>
+              {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}
+            </Row>
+          </Card>
+        </View>
+      </View>
+    </RootView>
+  )
+}
+```
+
+#### 11 - Affichage de la section About
+
+Pour l'affichage de cette section nous créons de nouveau un composant `<PokemonSpec />`.
+C'est un composant de type "conteneur", il devra donc importer des **Props** de type **ViewProps**, ainsi que des
+props correspondant à nos besoins : l'affichage d'un titre (une valeur), d'une description et d'une image potentiellement.
+Au cours du chargement des données de l'API ces données n'existants pas, nous devons ajouter un "?" lors de la déclaration de ces props.
+
+```
+type Props = ViewProps & {
+  title?: string,
+  description?: string,
+  image?: ImageSourcePropType
+};
+
+function PokemonSpec({ style, title, description, image, ...rest }: Props) {
+  return <View style={[style,  styles.root]}>
+    <Row style={styles.row}  gap={8}>
+      {image && <Image source={image} width={16} height={16} />}
+      <ThemedText>{title}</ThemedText>
+    </Row>
+    <ThemedText variant={"caption"} color={"grayMedium"}>{description}</ThemedText>
+  </View>
+}
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    gap: 4,
+    alignItems: 'center',
+  },
+  row: {
+    alignItems: 'center',
+    height: 32
+  }
+});
+```
+
+Du coté de la page **[id].tsx** nous retrouvons l'intégration suivante.
+
+```
+function Pokemon() {
+  [...]
+  const params = useLocalSearchParams() as {id: string};
+  const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
+  [...]
+
+  return (
+    <RootView style={ {backgroundColor: colorType} }>
+      <View style={styles.container}>
+        [...]
+        <View style={styles.body}>
+          [...]
+          <Card style={styles.card}>
+            [...]
+            <ThemedText variant="subtitle1" style={{color: colorType}}>About</ThemedText>
+            <Row>
+              <PokemonSpec title={formatWeight(pokemon?.weight)} description="Weight" image={require("@/assets/images/weight.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
+              <PokemonSpec title={formatWeight(pokemon?.height)} description="Height" image={require("@/assets/images/straighten.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
+              <PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />
+            </Row>
+          </Card>
+        </View>
+      </View>
+    </RootView>
+  )
+}
+```
+
+La partie un peu plus tricky se trouve au niveau des dernières specs : les movesets. En effet nous devons réaliser une suite d'opération afin d'obtenir les données
+souhaités `<PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />`.
+
+## ToDo
+* Récupérer le nom des moves proprement via l'API
