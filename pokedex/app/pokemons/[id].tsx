@@ -1,5 +1,6 @@
 import Card from "@/components/Card";
 import PokemonSpec from "@/components/pokemon/PokemonSpec";
+import PokemonStat from "@/components/pokemon/PokemonStat";
 import PokemonType from "@/components/pokemon/PokemonType";
 import RootView from "@/components/RootView";
 import Row from "@/components/Row";
@@ -54,6 +55,12 @@ const styles = StyleSheet.create({
   },
   card_row: {
     justifyContent: 'center'
+  },
+  bio: {
+    alignSelf: 'flex-start'
+  },
+  bars: {
+    alignSelf: 'stretch'
   }
 });
 
@@ -93,10 +100,17 @@ function Pokemon() {
               <PokemonSpec title={formatWeight(pokemon?.height)} description="Height" image={require("@/assets/images/straighten.png")} style={{borderStyle: "solid", borderRightWidth: 1, borderColor: colors.grayLight}}/>
               <PokemonSpec title={pokemon?.moves.slice(0,2).map(m => m.move.name).join("\n")} description="Moves" />
             </Row>
-            <ThemedText>{bio}</ThemedText>
+            <ThemedText style={styles.bio}>{bio}</ThemedText>
 
             {/* Base stats */}
             <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
+            <View style={styles.bars}>
+              <PokemonStat name="HP" value={102} color={colorType} />
+              <PokemonStat name="ATK" value={999} color={colorType} />
+              <PokemonStat name="DEF" value={12} color={colorType} />
+              <PokemonStat name="SATK" value={150} color={colorType} />
+              <PokemonStat name="SPD" value={600} color={colorType} />
+            </View>
           </Card>
         </View>
       </View>
