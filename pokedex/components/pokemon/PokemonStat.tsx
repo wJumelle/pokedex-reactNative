@@ -10,16 +10,20 @@ type Props = ViewProps & {
   color: string
 }
 
+function statsShortName(name: string): string {
+  return name.replaceAll('special', 'S').replaceAll('attack', 'ATK').replaceAll('defense', 'DEF').replaceAll('-', '').replaceAll('speed', 'SPD').toUpperCase();
+}
+
 function PokemonStat({style, name, value, color, ...rest} : Props) {
   const colors = useThemeColors();
 
   return (
     <Row style={[style, styles.root]} {...rest} gap={8}>
-      <ThemedText variant="subtitle3" style={[styles.name, { color: color, borderColor: colors.grayLight }]}>{name}</ThemedText>
+      <ThemedText variant="subtitle3" style={[styles.name, { color: color, borderColor: colors.grayLight }]}>{statsShortName(name)}</ThemedText>
       <ThemedText style={styles.value}>{value.toString().padStart(3, "0")}</ThemedText>
       <Row style={styles.bar}>
-        <View style={[styles.innerBar, { flex: 1, backgroundColor: color }]}></View>
-        <View style={[styles.backgroundBar, { flex: 1, backgroundColor: color }]}></View>
+        <View style={[styles.innerBar, { flex: value, backgroundColor: color }]}></View>
+        <View style={[styles.backgroundBar, { flex: 255 - value, backgroundColor: color }]}></View>
       </Row>
     </Row>
   )
@@ -50,7 +54,7 @@ const styles = StyleSheet.create({
   },
   backgroundBar: {
     height: 4,
-    opacity: 20
+    opacity: 0.20
   }
 })
 

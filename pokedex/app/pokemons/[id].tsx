@@ -105,11 +105,7 @@ function Pokemon() {
             {/* Base stats */}
             <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
             <View style={styles.bars}>
-              <PokemonStat name="HP" value={102} color={colorType} />
-              <PokemonStat name="ATK" value={999} color={colorType} />
-              <PokemonStat name="DEF" value={12} color={colorType} />
-              <PokemonStat name="SATK" value={150} color={colorType} />
-              <PokemonStat name="SPD" value={600} color={colorType} />
+              {pokemon?.stats.map((stat) => <PokemonStat name={stat.stat.name} key={stat.stat.name} value={stat.base_stat} color={colorType} />)}
             </View>
           </Card>
         </View>

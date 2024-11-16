@@ -1383,6 +1383,74 @@ Encore une fois au niveau de la constante **bio** c'est un peu technique de réc
 [**find()**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find) est une méthode JavaScript permettant de retourner le premier élément d'un tableau qui satisfait la fonction de test passé en paramètre. Ici notre fonction de test va regarder tout simplement la valeur du language présent dans l'élément du tableau, si l'élément est celui correspondant au `language === en` alors la méthode renvoie cet élément.
 Ensuite à l'intérieur de cet élément nous effectuons deux fonctions de nettoyage afin de proprement afficher le contenu textuel.
 
+#### Affichage de la section Base stats
+
+Pour gérer cette partie nous avons besoin d'un nouveau composant `<PokemonStat />` à l'intérieur duquel on va utiliser dynamiquement les datas de l'API.
+Au niveau des statitiques, lorsque l'on regarde les maquettes nous nous apercevons que nous allons avoir besoin de faire remonter 3 données : le **nom** de la stat, sa **valeur** ainsi que la **couleur du type principal** du pokémon.
+
+Les statistiques des pokémons sont réparties en 255 points, c'est la raison pour laquelle lors de la mise en place de nos barres nous allons utiliser une valeur de flex basée sur 255. `flex: 255 - value` pour le fond et `flex: value`  pour la barre représentant la valeur de la stat.
+
+La fonction **statsShortName** va nous permettre de réécrire comme sur les maquettes les noms des statistiques provenant de l'API.
+
+```
+type Props = ViewProps & {
+  name: string,
+  value: number,
+  color: string
+}
+
+function statsShortName(name: string): string {
+  return name.replaceAll('special', 'S').replaceAll('attack', 'ATK').replaceAll('defense', 'DEF').replaceAll('-', '').replaceAll('speed', 'SPD').toUpperCase();
+}
+
+function PokemonStat({style, name, value, color, ...rest} : Props) {
+  const colors = useThemeColors();
+
+  return (
+    <Row style={[style, styles.root]} {...rest} gap={8}>
+      <ThemedText variant="subtitle3" style={[styles.name, { color: color, borderColor: colors.grayLight }]}>{statsShortName(name)}</ThemedText>
+      <ThemedText style={styles.value}>{value.toString().padStart(3, "0")}</ThemedText>
+      <Row style={styles.bar}>
+        <View style={[styles.innerBar, { flex: value, backgroundColor: color }]}></View>
+        <View style={[styles.backgroundBar, { flex: 255 - value, backgroundColor: color }]}></View>
+      </Row>
+    </Row>
+  )
+}
+```
+
+Coté page **[id].tsx** nous allons simplement parcourir les résultats retournés par l'API au niveau du tableau **pokemon.stats** à l'aide de la méthode **map()**.
+
+```
+function Pokemon() {
+  [...]
+  const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
+  const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: params.id});
+  const mainType = pokemon?.types?.[0].type.name;
+  const colorType = mainType ? Colors.types[mainType] : colors.tint;
+  [...]
+
+  return (
+    <RootView style={ {backgroundColor: colorType} }>
+      <View style={styles.container}>
+        [...]
+        <View style={styles.body}>
+          [...]
+          <Card style={styles.card}>
+            [...]
+            {/* Base stats */}
+            <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
+            <View style={styles.bars}>
+              {pokemon?.stats.map((stat) => <PokemonStat name={stat.stat.name} key={stat.stat.name} value={stat.base_stat} color={colorType} />)}
+            </View>
+          </Card>
+        </View>
+      </View>
+    </RootView>
+  )
+}
+```
+
 ## ToDo
 * Récupérer le nom des moves proprement via l'API
 * Réaliser la traduction de l'app en français
