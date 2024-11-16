@@ -76,7 +76,7 @@ function Pokemon() {
   console.log({mainType, colorType});
 
   return (
-    <RootView style={ {backgroundColor: colorType} }>
+    <RootView backgroundColor={colorType}>
       <View style={styles.container}>
         <Image source={require("@/assets/images/pokeball_big.png")} style={styles.pokeball_bkg} />
         <Row style={styles.headerBar} gap={8}>

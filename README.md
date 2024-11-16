@@ -1451,6 +1451,77 @@ function Pokemon() {
 }
 ```
 
+### 12 - Animation de l'app
+
+Par défaut lorsque l'on utilise Expo pour construire notre projet la librairie [**React Native Reanimated**](https://docs.swmansion.com/react-native-reanimated/) est installée. C'est cette librairie que nous allons utiliser pour nous aider à rendre plus vivante l'app.
+
+#### - Animation de la couleur de fond lors de l'affichage de la page de détail d'un pokémon
+
+Pour définir une animation nous allons utiliser une valeur qui sera pilotée par react-native-reanimated à l'aide du hook **useSharedValue**.
+Cette valeur peut être utilisée dans les attributs styles des composants et pourra être modifiée, notamment à l'aide du hook **useEffect**.
+
+La définition de la couleur de fond de notre page se joue au niveau du composant `<RootView />`, c'est donc ici que nous allons travailler.
+
+Nous commençons par informer React Native que nous allons attendre une props supplémentaire qui s'appelera **backgroundColor**.
+Cette props n'est pas obligatoire, en effet par défaut nous ne désirons pas préciser quelle couleur de fond afficher et afficher la couleur colors.tint.
+```
+type Props = ViewProps & {
+  backgroundColor?: string
+};
+```
+
+Ensuite, nous allons définir à l'aide du hook **useSharedValue** notre valeur partagée que l'on nommera **progress** et qui vaudra initialement 0.
+Le hook **useAnimatedStyle** nous permet de définir le style que nous allons utiliser dans notre composant `<RootView />`. Il faut faire attention à bien préciser le tableau de dépendance en fonction de la variable **backgroundColor** que l'on reçoit en props.
+
+Nous avons alors à définir la façon dont la valeur **progress** va passer de 0 à 1, comme dit plutot l'utilisation du hook **useEffect** est la plus adaptée à notre situation.
+Le hook prendra lui aussi en tableau de dépendance la props **backgroundColor** et on vérifiera bien à l'intérieur du hook que la props existe pour jouer l'animation.
+`progress.value = 0` nous permet de nous assurer que l'animation se joue bien à chaque fois.
+
+Enfin, nous terminons par gérer l'affichage de nos vues en fonction de l'existance ou non de la props **backgroundColor**.
+
+```
+function RootView({style, backgroundColor, ...rest}: Props) {
+  const colors = useThemeColors();
+  const progress = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      backgroundColor: interpolateColor(
+        progress.value,
+        [0, 1],
+        [colors.tint, backgroundColor ?? colors.tint]
+      ),
+    };
+  }, [backgroundColor]);
+
+  useEffect(() => {
+    if(backgroundColor) {
+      progress.value = 0;
+      progress.value = withTiming(1, {
+        duration: 700,
+        easing: Easing.out(Easing.quad),
+        reduceMotion: ReduceMotion.System,
+      })
+    }
+  }, [backgroundColor])
+
+  // Si aucune couleur de fond n'est défini, alors pas d'animation et affichage en colors.tint
+  if(!backgroundColor) {
+    return (
+      <SafeAreaView style={[rootStyle, {backgroundColor: colors.tint}, style]} {...rest} />
+    )
+  }
+
+  // Sinon on joue une animation pour jouer la transition entre les couleurs de fond
+  return (
+    <Animated.View style={[{flex: 1}, animatedStyle, style]} >
+      <SafeAreaView style={rootStyle} {...rest} />
+    </Animated.View>
+  )
+}
+```
+
+
+
 ## ToDo
 * Récupérer le nom des moves proprement via l'API
 * Réaliser la traduction de l'app en français
