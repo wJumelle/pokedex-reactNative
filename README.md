@@ -1520,7 +1520,44 @@ function RootView({style, backgroundColor, ...rest}: Props) {
 }
 ```
 
+Si l'on veut faire des animations un peu plus proche de ce qui est traditionnel à React on peut utiliser la librairie [**MotiView**](https://moti.fyi/animations). Mais cela rajoute une surcouche supplémentaire ce qui peut alourdir le projet.
 
+#### - Animation des barres des statistiques lors du chargement des données
+
+On part exactement du même principe que plus tot, sauf que cette fois-ci nous allons utiliser une autre fonction de timing **withSpring** qui permet
+d'avoir un léger rebond dans l'effet, ce qui est plutot sympa pour une barre de stats.
+
+```
+function PokemonStat({style, name, value, color, ...rest} : Props) {
+  const colors = useThemeColors();
+  const sharedValue = useSharedValue(value);
+  const barInnerStyle = useAnimatedStyle(() => {
+    return {
+      flex: sharedValue.value
+    };
+  });
+  const barBackgroundStyle = useAnimatedStyle(() => {
+    return {
+      flex: 255 - sharedValue.value
+    };
+  });
+
+  useEffect(() => {
+    sharedValue.value = withSpring(value)
+  }, [value])
+
+  return (
+    <Row style={[style, styles.root]} {...rest} gap={8}>
+      <ThemedText variant="subtitle3" style={[styles.name, { color: color, borderColor: colors.grayLight }]}>{statsShortName(name)}</ThemedText>
+      <ThemedText style={styles.value}>{value.toString().padStart(3, "0")}</ThemedText>
+      <Row style={styles.bar}>
+        <Animated.View style={[styles.innerBar, barInnerStyle, { backgroundColor: color }]}></Animated.View>
+        <Animated.View style={[styles.backgroundBar, barBackgroundStyle, { backgroundColor: color }]}></Animated.View>
+      </Row>
+    </Row>
+  )
+}
+```
 
 ## ToDo
 * Récupérer le nom des moves proprement via l'API

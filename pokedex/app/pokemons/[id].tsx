@@ -6,7 +6,7 @@ import RootView from "@/components/RootView";
 import Row from "@/components/Row";
 import ThemedText from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
-import { capitalizeFirstLetter, formatWeight, getPokemonArtwork } from "@/functions/pokemons";
+import { capitalizeFirstLetter, formatWeight, getPokemonArtwork, pokemonBaseStats } from "@/functions/pokemons";
 import { useFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
 import { router, useLocalSearchParams } from "expo-router";
@@ -54,7 +54,8 @@ const styles = StyleSheet.create({
     paddingTop: 56,
   },
   card_row: {
-    justifyContent: 'center'
+    justifyContent: 'center',
+    height: 20
   },
   bio: {
     alignSelf: 'flex-start'
@@ -73,7 +74,7 @@ function Pokemon() {
   const colorType = mainType ? Colors.types[mainType] : colors.tint;
   const types = pokemon?.types ?? [];
   const bio = species?.flavor_text_entries?.find(({language}) => language.name === "en")?.flavor_text.replaceAll("\n", " ").replaceAll("\f", "\n");
-  console.log({mainType, colorType});
+  const stats = pokemon?.stats ?? pokemonBaseStats;
 
   return (
     <RootView backgroundColor={colorType}>
@@ -105,7 +106,7 @@ function Pokemon() {
             {/* Base stats */}
             <ThemedText variant="subtitle1" style={{color: colorType}}>Base stats</ThemedText>
             <View style={styles.bars}>
-              {pokemon?.stats.map((stat) => <PokemonStat name={stat.stat.name} key={stat.stat.name} value={stat.base_stat} color={colorType} />)}
+              {stats.map((stat) => <PokemonStat name={stat.stat.name} key={stat.stat.name} value={stat.base_stat} color={colorType} />)}
             </View>
           </Card>
         </View>
