@@ -13,6 +13,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { Audio } from "expo-av";
+import PagerView from 'react-native-pager-view';
 
 const styles = StyleSheet.create({
   container: {
@@ -74,11 +75,20 @@ const styles = StyleSheet.create({
 });
 
 function Pokemon() {
-  const colors = useThemeColors();
   const params = useLocalSearchParams() as {id: string};
   const id = parseInt(params.id, 10);
-  const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
-  const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: params.id});
+
+  return <PagerView initialPage={1} style={{flex: 1}}>
+    <PokemonView id={id - 1} />
+    <PokemonView id={id} />
+    <PokemonView id={id + 1} />
+  </PagerView>
+}
+
+function PokemonView({id}: Readonly<{id: number}>) {
+  const colors = useThemeColors();
+  const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: id});
+  const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: id});
   const mainType = pokemon?.types?.[0].type.name;
   const colorType = mainType ? Colors.types[mainType] : colors.tint;
   const types = pokemon?.types ?? [];
@@ -120,7 +130,7 @@ function Pokemon() {
             <Image source={require("@/assets/images/arrow_back-white.png")} width={32} height={32} />
           </Pressable>
           <ThemedText variant="headline" color="grayWhite" style={styles.title}>{pokemon?.name ? capitalizeFirstLetter(pokemon.name) : ''}</ThemedText>
-          <ThemedText variant="subtitle2" color="grayWhite">#{params.id.toString().padStart(3, '0')}</ThemedText>
+          <ThemedText variant="subtitle2" color="grayWhite">#{id.toString().padStart(3, '0')}</ThemedText>
         </Row>
         <Card style={styles.card}>
           {/* Artwork et navigation */}
@@ -129,7 +139,7 @@ function Pokemon() {
               <Image source={require("@/assets/images/chevron_left--white.png")} style={styles.navigation_button} />
             </Pressable>}
             <Pressable onPress={onArtworkPress}>
-              <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+              <Image source={{uri: getPokemonArtwork(id)}} style={styles.artwork} />
             </Pressable>
             {isLast ? <View style={styles.navigation_button}></View> : <Pressable onPress={onNext}>
               <Image source={require("@/assets/images/chevron_right--white.png")} style={styles.navigation_button} />

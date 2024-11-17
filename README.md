@@ -1648,6 +1648,38 @@ function Pokemon() {
 }
 ```
 
+### 13 - Mise en place du swipe
+
+Grafikart prévient que le swipe n'est pas efficace à 100% sur Apple.
+
+Pour réaliser cette navigation nous allons avoir besoin de la librairie [**react-native-pager-view**](https://github.com/callstack/react-native-pager-view).
+`npx expo install react-native-pager-view`
+
+#### 13 - Mise en place du swipe entre -1 / 1 / +1
+
+Par défault, lors de l'utilisation du composant `<PagerView />` nous allons pouvoir mettre en place une sorte de carrousel entre 3 de nos pokémons : celui sur lequel on a cliqué, celui d'avant et celui d'après. Nous n'allons pas nous amuser à faire un carrousel avec les 1025 même si ce serait possible, nous verrons dans un second temps comment adapter notre code pour rendre ça dynamique.
+
+Donc pour commencer on renomme notre composant `<Pokemon />` en `<PokemonView />` et on créé un nouveau composant `<Pokemon />`.
+Ce nouveau composant va s'occuper uniquement de la réception des paramètres et donc de la récupération de l'id et de créer notre carrousel de page.
+La migration de la gestion des paramètres dans ce nouveau composant nécessite la réécriture de certains passage de notre composant `<PokemonView />`.
+
+Petite particularité pour notre composant `<PagerView />` nous allons lui transmetre la props **initalPage** avec une valeur de 1, ce qui veut dire que la page que nous afficherons sera la page 1, le pokémon précédent la page 0 et le pokémon suivant la page 2.
+
+```
+function Pokemon() {
+  const params = useLocalSearchParams() as {id: string};
+  const id = parseInt(params.id, 10);
+
+  return <PagerView initialPage={1} style={{flex: 1}}>
+    <PokemonView id={id - 1} />
+    <PokemonView id={id} />
+    <PokemonView id={id + 1} />
+  </PagerView>
+}
+```
+
 ## ToDo
+* Le texte du champ input n'apparait plus, il semble être écrit en blanc
+* Lors de la navigation entre les pages l'animation passe forcément du rouge vers la couleur du type. voir pour partager la couleur actuelle.
 * Récupérer le nom des moves proprement via l'API
 * Réaliser la traduction de l'app en français
