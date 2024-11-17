@@ -45,9 +45,6 @@ export function useFetchQuery<T extends keyof API>(path: T, params?: Record<stri
   return useQuery({
     queryKey: [localUrl],
     queryFn: async () => {
-      // La fonction est un timer qui va nous permettre de simuler un périphèrique ou une connexion lente
-      await wait(1);
-
       // Une fois le timer passer on retourne le résultat de l'appel API
       return fetch(localUrl).then(r => r.json() as Promise<API[T]>)
     }
@@ -60,7 +57,6 @@ export function useInfiniteFetchQuery<T extends keyof API>(path: T) {
     queryKey: [path],
     initialPageParam: endpoint + path,
     queryFn: async ({pageParam}) => {
-      await wait(1);
       return fetch(pageParam, {
         headers: {
           Accept: 'application/json'

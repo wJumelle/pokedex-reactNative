@@ -31,13 +31,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -144,
     left: 0,
+    right: 0,
     zIndex: 5,
-    width: "100%",
+    justifyContent: 'space-between',
+    paddingHorizontal: 20
   },
   artwork: {
     alignSelf: "center",
     width: 200,
     height: 200,
+  },
+  navigation_button: {
+    width: 24,
+    height: 24
   },
   pokeball_bkg: {
     position: "absolute",
@@ -73,6 +79,7 @@ const styles = StyleSheet.create({
 function Pokemon() {
   const colors = useThemeColors();
   const params = useLocalSearchParams() as {id: string};
+  const id = parseInt(params.id, 10);
   const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: params.id});
   const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: params.id});
   const mainType = pokemon?.types?.[0].type.name;
@@ -95,6 +102,18 @@ function Pokemon() {
     sound.playAsync();
   }
 
+  const onPrevious = () => {
+    router.replace({pathname: '/pokemons/[id]', params: {id: Math.max(id - 1, 0)}})
+  }
+
+  const onNext = () => {
+    // On fixe la limite à 1025 - le nombre actuel max de pokémon toutes les génération confondues
+    router.replace({pathname: '/pokemons/[id]', params: {id: Math.min(id + 1, 1025)}})
+  }
+
+  const isFirst = id === 1 ? true : false;
+  const isLast = id === 1025 ? true : false;
+
   return (
     <RootView backgroundColor={colorType}>
       <View style={styles.container}>
@@ -108,9 +127,15 @@ function Pokemon() {
         </Row>
         <View style={styles.body}>
           <Row style={styles.artwork_container}>
+            {isFirst ? <View style={styles.navigation_button}></View> : <Pressable onPress={onPrevious}>
+              <Image source={require("@/assets/images/chevron_left--white.png")} style={styles.navigation_button} />
+            </Pressable>}
             <Pressable onPress={onArtworkPress}>
               <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
             </Pressable>
+            {isLast ? <View style={styles.navigation_button}></View> : <Pressable onPress={onNext}>
+              <Image source={require("@/assets/images/chevron_right--white.png")} style={styles.navigation_button} />
+            </Pressable>}
           </Row>
           <Card style={styles.card}>
             <Row style={styles.card_row} gap={16}>

@@ -1592,6 +1592,62 @@ const onArtworkPress = async () => {
 }
 ```
 
+### 13 - Ajout de la navigation pour passer d'un pokémon à l'autre sans avoir à retourner sur la liste
+
+Il va maintenant nous falloir mettre en place nos deux composants `<Pressable />` nous permettant de naviguer. Pour cela nous allons les créer autour de
+notre artwork.
+Attention, il faut que lors de l'affichage du premier pokémon, nous n'ayons pas la flèche "Voir le pokémon précédent", idem pour le dernier pokémon mais cette fois-ci
+pas de flèche "Voir le pokémon suivant".
+
+Nous créons donc nos deux pressable qui vont appeler les méthodes **onPrevious** et **onNext**. Ces méthodes utiliserons le **router** et nous souhaitons que le chargement de l'affichage n'ajoute pas de stack dans l'empilement, c'est donc la raison pour laquelle nous allons utiliser la méthode **router.replace**.
+A l'intérieur de ces méthodes nous allons utiliser les méthodes statiques de **Math** suivantes : **max()** et **min()** qui nous permettront de limiter nos appels.
+
+Ensuite pour gérer l'affichage ou non des flèches nous allons mettre en place des booléens **isFirst** et **isLast** qui nous permettront en fonction du test d'afficher
+la flèche de navigation où une vue vide occupant l'espace associé.
+
+```
+function Pokemon() {
+  [...]
+  const params = useLocalSearchParams() as {id: string};
+  const id = parseInt(params.id, 10);
+  [...]
+
+  const onPrevious = () => {
+    router.replace({pathname: '/pokemons/[id]', params: {id: Math.max(id - 1, 0)}})
+  }
+
+  const onNext = () => {
+    // On fixe la limite à 1025 - le nombre actuel max de pokémon toutes les génération confondues
+    router.replace({pathname: '/pokemons/[id]', params: {id: Math.min(id + 1, 1025)}})
+  }
+
+  const isFirst = id === 1 ? true : false;
+  const isLast = id === 1025 ? true : false;
+
+  return (
+    <RootView backgroundColor={colorType}>
+      <View style={styles.container}>
+        [...]
+        <View style={styles.body}>
+          <Row style={styles.artwork_container}>
+            {isFirst ? <View style={styles.navigation_button}></View> : <Pressable onPress={onPrevious}>
+              <Image source={require("@/assets/images/chevron_left--white.png")} style={styles.navigation_button} />
+            </Pressable>}
+            <Pressable onPress={onArtworkPress}>
+              <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+            </Pressable>
+            {isLast ? <View style={styles.navigation_button}></View> : <Pressable onPress={onNext}>
+              <Image source={require("@/assets/images/chevron_right--white.png")} style={styles.navigation_button} />
+            </Pressable>}
+          </Row>
+          [...]
+        </View>
+      </View>
+    </RootView>
+  )
+}
+```
+
 ## ToDo
 * Récupérer le nom des moves proprement via l'API
 * Réaliser la traduction de l'app en français
