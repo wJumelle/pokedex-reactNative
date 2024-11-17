@@ -12,6 +12,7 @@ import useThemeColors from "@/hooks/useThemeColors";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Audio } from "expo-av";
 
 const styles = StyleSheet.create({
   container: {
@@ -26,13 +27,17 @@ const styles = StyleSheet.create({
   title: {
     flex: 1
   },
-  artwork: {
+  artwork_container: {
     position: 'absolute',
     top: -144,
+    left: 0,
+    zIndex: 5,
+    width: "100%",
+  },
+  artwork: {
     alignSelf: "center",
     width: 200,
     height: 200,
-    zIndex: 5,
   },
   pokeball_bkg: {
     position: "absolute",
@@ -76,6 +81,20 @@ function Pokemon() {
   const bio = species?.flavor_text_entries?.find(({language}) => language.name === "en")?.flavor_text.replaceAll("\n", " ").replaceAll("\f", "\n");
   const stats = pokemon?.stats ?? pokemonBaseStats;
 
+  const onArtworkPress = async () => {
+    const cry = pokemon?.cries.latest;
+
+    if(!cry) {
+      return;
+    }
+
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: cry },
+      { shouldPlay: true }
+    );
+    sound.playAsync();
+  }
+
   return (
     <RootView backgroundColor={colorType}>
       <View style={styles.container}>
@@ -88,7 +107,11 @@ function Pokemon() {
           <ThemedText variant="subtitle2" color="grayWhite">#{params.id.toString().padStart(3, '0')}</ThemedText>
         </Row>
         <View style={styles.body}>
-          <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+          <Row style={styles.artwork_container}>
+            <Pressable onPress={onArtworkPress}>
+              <Image source={{uri: getPokemonArtwork(params.id)}} style={styles.artwork} />
+            </Pressable>
+          </Row>
           <Card style={styles.card}>
             <Row style={styles.card_row} gap={16}>
               {types.map( type => <PokemonType name={type.type.name} key={type.type.name} />)}

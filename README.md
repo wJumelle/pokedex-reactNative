@@ -1383,7 +1383,7 @@ Encore une fois au niveau de la constante **bio** c'est un peu technique de réc
 [**find()**](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find) est une méthode JavaScript permettant de retourner le premier élément d'un tableau qui satisfait la fonction de test passé en paramètre. Ici notre fonction de test va regarder tout simplement la valeur du language présent dans l'élément du tableau, si l'élément est celui correspondant au `language === en` alors la méthode renvoie cet élément.
 Ensuite à l'intérieur de cet élément nous effectuons deux fonctions de nettoyage afin de proprement afficher le contenu textuel.
 
-#### Affichage de la section Base stats
+#### 12 - Affichage de la section Base stats
 
 Pour gérer cette partie nous avons besoin d'un nouveau composant `<PokemonStat />` à l'intérieur duquel on va utiliser dynamiquement les datas de l'API.
 Au niveau des statitiques, lorsque l'on regarde les maquettes nous nous apercevons que nous allons avoir besoin de faire remonter 3 données : le **nom** de la stat, sa **valeur** ainsi que la **couleur du type principal** du pokémon.
@@ -1455,7 +1455,7 @@ function Pokemon() {
 
 Par défaut lorsque l'on utilise Expo pour construire notre projet la librairie [**React Native Reanimated**](https://docs.swmansion.com/react-native-reanimated/) est installée. C'est cette librairie que nous allons utiliser pour nous aider à rendre plus vivante l'app.
 
-#### - Animation de la couleur de fond lors de l'affichage de la page de détail d'un pokémon
+#### 12 - Animation de la couleur de fond lors de l'affichage de la page de détail d'un pokémon
 
 Pour définir une animation nous allons utiliser une valeur qui sera pilotée par react-native-reanimated à l'aide du hook **useSharedValue**.
 Cette valeur peut être utilisée dans les attributs styles des composants et pourra être modifiée, notamment à l'aide du hook **useEffect**.
@@ -1522,7 +1522,7 @@ function RootView({style, backgroundColor, ...rest}: Props) {
 
 Si l'on veut faire des animations un peu plus proche de ce qui est traditionnel à React on peut utiliser la librairie [**MotiView**](https://moti.fyi/animations). Mais cela rajoute une surcouche supplémentaire ce qui peut alourdir le projet.
 
-#### - Animation des barres des statistiques lors du chargement des données
+#### 12 - Animation des barres des statistiques lors du chargement des données
 
 On part exactement du même principe que plus tot, sauf que cette fois-ci nous allons utiliser une autre fonction de timing **withSpring** qui permet
 d'avoir un léger rebond dans l'effet, ce qui est plutot sympa pour une barre de stats.
@@ -1556,6 +1556,39 @@ function PokemonStat({style, name, value, color, ...rest} : Props) {
       </Row>
     </Row>
   )
+}
+```
+
+### 13 - Ajout des cris des pokémons au clic sur l'artwork
+
+Pour la lecture de multimédia nous allons avoir besoin d'une nouvelle librairie : **expo-av**. Pour l'installer nous devons saisir la commande suivante `npx expo install expo-av`.
+La commande change un peu de d'habitude car nous passons par **expo** afin de choisir la version nécessaire pour la librairie.
+
+> ❗ j'ai été bloqué car la version chargé lors de mon développement était sous le SDK 52 alors que celle du tuto est le SDK 51. Certains changements faisaient que
+> mon app buguait ! Donc point de vigileance là-dessus. La version du SDK apparait lorsque l'on tape la commande d'installation de la librairie.
+
+Sinon pour jouer un audio c'est assez simple, nous allons avoir besoin de modifier légérement notre architecture autour de l'artwork en ajoutant
+un composant `<Pressable />` autour, et on en profite pour insérer le tout dans une `<Row />` car lorsque l'on regarde la maquette on aperçoit que des boutons de
+navigation sont présents pour passer d'un pokémon à l'autre autour de l'artwork.
+
+Une fois que c'est fait il ne nous reste plus qu'à gérer la fonction **onArtworkPress** que l'on appelle en écoutant le **onPress** de notre composant `<Pressable />`.
+Cette fonction sera une fonction asynchrone qui va aller chercher le cri du pokémon et qui si il existe va créer l'objet **sound** à l'aide de la méthode
+**Audio.Sound.createAsync()** de la librairie **expo-av**.
+Ensuite on appelle la méthode **playAsync()** pour jouer le son.
+
+```
+const onArtworkPress = async () => {
+  const cry = pokemon?.cries.latest;
+
+  if(!cry) {
+    return;
+  }
+
+  const { sound } = await Audio.Sound.createAsync(
+    { uri: cry },
+    { shouldPlay: true }
+  );
+  sound.playAsync();
 }
 ```
 
