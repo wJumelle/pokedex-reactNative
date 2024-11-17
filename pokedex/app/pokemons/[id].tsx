@@ -10,7 +10,7 @@ import { capitalizeFirstLetter, formatWeight, getPokemonArtwork, pokemonBaseStat
 import { useFetchQuery } from "@/hooks/useFetchQuery";
 import useThemeColors from "@/hooks/useThemeColors";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Image, Pressable, StyleSheet, View } from "react-native";
 import { Audio } from "expo-av";
 import PagerView from 'react-native-pager-view';
@@ -76,16 +76,74 @@ const styles = StyleSheet.create({
 
 function Pokemon() {
   const params = useLocalSearchParams() as {id: string};
-  const id = parseInt(params.id, 10);
+  const [ id, setId ] = useState(parseInt(params.id, 10));
+  // on initialise useRef avec la valeur 1 car c'est la valeur par défaut de la page que l'on visite (initialPage)
+  const offset = useRef(1);
+  const pager = useRef<PagerView>(null);
 
-  return <PagerView initialPage={1} style={{flex: 1}}>
-    <PokemonView id={id - 1} />
-    <PokemonView id={id} />
-    <PokemonView id={id + 1} />
-  </PagerView>
+  const onPageSelected = (e: {nativeEvent: {position: number}}) => {
+    // par défaut position renvoi 0 / 1 ou 2, on souhaite pour nous simplifier la vie d'avoir -1 / 0 / 1 donc on enlève 1 à la position
+    offset.current = e.nativeEvent.position - 1;
+    console.log('onPageSelected', 'e.nativeEvent.position => ' + e.nativeEvent.position, 'offset.current => ' + offset.current);
+  }
+
+  const onPageScrollStateChanged = (e: {nativeEvent: {pageScrollState: string}}) => {
+    const state = e.nativeEvent.pageScrollState;
+
+    if(state !== 'idle') {
+      return;
+    }
+
+    if(offset.current === -1 && id === 2) {
+      return;
+    }
+
+    if(offset.current === 1 && id === 1025) {
+      return;
+    }
+
+    // on teste si l'app est "inactive" et que l'on est plus sur la page initiale (1)
+    if(offset.current !== 0) {
+      // on met à jour l'id en fonction de la nouvelle position
+      setId(id + offset.current);
+
+      // une fois l'id mis à jour on réinitialise l'offset à 0 pour permettre de simuler qu'on est sur la page initiale
+      offset.current = 0;
+
+      //
+      pager.current?.setPageWithoutAnimation(1);
+    }
+  }
+
+  const onPrevious = () => {
+    pager.current?.setPage(0);
+  }
+
+  const onNext = () => {
+    pager.current?.setPage(2 + offset.current);
+  }
+
+  return (
+    <PagerView
+      ref={pager}
+      onPageSelected={onPageSelected}
+      onPageScrollStateChanged={onPageScrollStateChanged}
+      initialPage={1}
+      style={{flex: 1}}>
+      <PokemonView key= {id - 1} id={id - 1} onPrevious={onPrevious} onNext={onNext} />
+      <PokemonView key= {id} id={id} onPrevious={onPrevious} onNext={onNext} />
+      <PokemonView key= {id + 1} id={id + 1} onPrevious={onPrevious} onNext={onNext} />
+    </PagerView>
+  )
 }
 
-function PokemonView({id}: Readonly<{id: number}>) {
+type Props = {
+  id: number,
+  onPrevious: () => void,
+  onNext: () => void
+}
+
+function PokemonView({id, onPrevious, onNext}: Props) {
   const colors = useThemeColors();
   const { data: pokemon } = useFetchQuery('/pokemon/[id]', {id: id});
   const { data: species } = useFetchQuery('/pokemon-species/[id]', {id: id});
@@ -109,17 +167,8 @@ function PokemonView({id}: Readonly<{id: number}>) {
     sound.playAsync();
   }
 
-  const onPrevious = () => {
-    router.replace({pathname: '/pokemons/[id]', params: {id: Math.max(id - 1, 0)}})
-  }
-
-  const onNext = () => {
-    // On fixe la limite à 1025 - le nombre actuel max de pokémon toutes les génération confondues
-    router.replace({pathname: '/pokemons/[id]', params: {id: Math.min(id + 1, 1025)}})
-  }
-
-  const isFirst = id === 1 ? true : false;
-  const isLast = id === 1025 ? true : false;
+  const isFirst = id === 1;
+  const isLast = id === 1025;
 
   return (
     <RootView backgroundColor={colorType}>

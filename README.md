@@ -1678,6 +1678,10 @@ function Pokemon() {
 }
 ```
 
+#### 13 - Mise en place du carrousel dynamique
+
+C'est buggué ALED j'ai plus de cerveau.
+
 ## ToDo
 * Le texte du champ input n'apparait plus, il semble être écrit en blanc
 * Lors de la navigation entre les pages l'animation passe forcément du rouge vers la couleur du type. voir pour partager la couleur actuelle.
