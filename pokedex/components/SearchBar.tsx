@@ -31,8 +31,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 16,
-    lineHeight: 16
+    fontSize: 10
   }
 })
 
