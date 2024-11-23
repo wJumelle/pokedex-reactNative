@@ -1683,6 +1683,5 @@ function Pokemon() {
 C'est buggué ALED j'ai plus de cerveau.
 
 ## ToDo
-* Lors de la navigation entre les pages l'animation passe forcément du rouge vers la couleur du type. voir pour partager la couleur actuelle.
 * Récupérer le nom des moves proprement via l'API
 * Réaliser la traduction de l'app en français

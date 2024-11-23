@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
 
 function Pokemon() {
   const params = useLocalSearchParams() as {id: string};
+  // L'id n'est pas une donnée statique, car au swipe nous allons modifier le pokémon que l'on observe donc l'id doit varier
   const [ id, setId ] = useState(parseInt(params.id, 10));
   // on initialise useRef avec la valeur 1 car c'est la valeur par défaut de la page que l'on visite (initialPage)
   const offset = useRef(1);
@@ -84,7 +85,6 @@ function Pokemon() {
   const onPageSelected = (e: {nativeEvent: {position: number}}) => {
     // par défaut position renvoi 0 / 1 ou 2, on souhaite pour nous simplifier la vie d'avoir -1 / 0 / 1 donc on enlève 1 à la position
     offset.current = e.nativeEvent.position - 1;
-    console.log('onPageSelected', 'e.nativeEvent.position => ' + e.nativeEvent.position, 'offset.current => ' + offset.current);
   }
 
   const onPageScrollStateChanged = (e: {nativeEvent: {pageScrollState: string}}) => {
@@ -109,9 +109,6 @@ function Pokemon() {
 
       // une fois l'id mis à jour on réinitialise l'offset à 0 pour permettre de simuler qu'on est sur la page initiale
       offset.current = 0;
-
-      //
-      pager.current?.setPageWithoutAnimation(1);
     }
   }
 
