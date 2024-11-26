@@ -79,12 +79,15 @@ function Pokemon() {
   // L'id n'est pas une donnée statique, car au swipe nous allons modifier le pokémon que l'on observe donc l'id doit varier
   const [ id, setId ] = useState(parseInt(params.id, 10));
   // on initialise useRef avec la valeur 1 car c'est la valeur par défaut de la page que l'on visite (initialPage)
-  const offset = useRef(1);
+  const offset = useRef(0);
   const pager = useRef<PagerView>(null);
 
   const onPageSelected = (e: {nativeEvent: {position: number}}) => {
     // par défaut position renvoi 0 / 1 ou 2, on souhaite pour nous simplifier la vie d'avoir -1 / 0 / 1 donc on enlève 1 à la position
+    console.log('onPageSelected', e.nativeEvent.position, offset.current);
     offset.current = e.nativeEvent.position - 1;
+    console.log('onPageSelected', e.nativeEvent.position, offset.current);
+    console.log('---------------------');
   }
 
   const onPageScrollStateChanged = (e: {nativeEvent: {pageScrollState: string}}) => {
@@ -125,7 +128,7 @@ function Pokemon() {
       ref={pager}
       onPageSelected={onPageSelected}
       onPageScrollStateChanged={onPageScrollStateChanged}
-      initialPage={1}
+      initialPage={0}
       style={{flex: 1}}>
       <PokemonView key= {id - 1} id={id - 1} onPrevious={onPrevious} onNext={onNext} />
       <PokemonView key= {id} id={id} onPrevious={onPrevious} onNext={onNext} />

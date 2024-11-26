@@ -1680,7 +1680,30 @@ function Pokemon() {
 
 #### 13 - Mise en place du carrousel dynamique
 
-C'est buggué ALED j'ai plus de cerveau.
+Dans le concept précédent nous étions bloqué sur 3 pokémons, lorsque l'on cliquait sur
+un pokémon, par exemple Pikachu, on pouvait voir la fiche de Pikachu (position 1), mais aussi la fiche du pokémon juste avant lui (position 0) et celui juste après (position 2).
+On pourrait effectuer deux boucles pour créer autant de `<PokemonView />` qu'il n'y a de pokémon avant Pikachu, et idem pour après.
+
+Le problème c'est que cela demanderait de charger donc tous les pokémons en parallèle, ce qui
+serait totalement lourd pour l'application. La solution est donc de rendre la chose dynamique en restant sur notre version en 3 composant `<PokemonView />`.
+
+L'idée est la suivante : lorsque l'on va se déplacer dans le carrousel de 3 éléments on va
+venir charger automatiquement les pokémons précédents ou suivants (en fonction du déplacement).
+
+Le composant `<PagerView />` vient avec deux props qui vont nous intéresser : **onPageSelected** et **onPageScrollStateChanged** :
+* **onPageSelected** : est une fonction qui est exécuté lorsque le pager possède un état spécifique. Cet été arrive juste avant le "idle" signifiant que le pager est stabilisé dans son état.
+* **onPageScrollStateChanged** : est une fonction qui est exécuté lorsque l'état du pager change. Il existe 3 état qui sont écoutés : **dragging**, **settling** et **idle**. Le 4ème état étant **selected** qui vient s'insérer (lorsque cela est le cas) entre **settling** et **idle**.
+
+L'état **selected** n'est pas forcément déclenché lorsque l'utilisateur effectue une action.
+Par exemple il peut commencer à **drag** la page vers la gauche puis la relacher sans atteindre 50% de son écran. Ainsi le pager ne va pas changer de page en cours et va déclenché les événements **settling** automatiquement puis **idle** lorsque l'état est stable.
+
+Pour nous en sortir nous allons donc utiliser deux éléments disponible grace aux éléments qui nous sont mis à disposition via nos deux fonctions : **e.nativeEvent.position** et **e.nativeEvent.pageScrollState**.
+
+Comme dit plus haut, dans notre cas **e.nativeEvent.position** contiendra soit 1, soit 0, soit 2, en fonction de la positon dans le carrousel.
+
+**e.nativeEvent.pageScrollState** contiendra les états du pager.
+
+
 
 ## ToDo
 * Récupérer le nom des moves proprement via l'API
